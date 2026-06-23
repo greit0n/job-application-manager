@@ -1,0 +1,55 @@
+# Private user data
+*.pdf
+*.doc
+*.docx
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.heic
+*.tiff
+*.bmp
+*.json
+*.zip
+
+# Allow package metadata only if future development adds it intentionally
+!package.json
+!package-lock.json
+
+# Common private export names
+*backup*
+*Backup*
+*export*
+*Export*
+applications/
+Applications/
+proofs/
+Proofs/
+cvs/
+CVs/
+resumes/
+Resumes/
+screenshots/
+Screenshots/
+private/
+Private/
+local/
+Local/
+tmp/
+temp/
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Automation and test artifacts
+.playwright-mcp/
+output/
+playwright-report/
+test-results/
+coverage/
+node_modules/

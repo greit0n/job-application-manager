@@ -578,12 +578,6 @@
   }
   .notice.warn { border-left-color: var(--c-pending); }
 
-  /* employers editor */
-  .emp-list { display: grid; gap: 14px; }
-  .emp-row { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px; background: var(--surface-2); position: relative; }
-  .emp-row .emp-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .emp-row .emp-head .lbl { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
-
   /* ---------- Tabs (intake) ---------- */
   .tabs { display: flex; gap: 4px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px; background: var(--surface-2); margin-bottom: 16px; }
   .tabs button { flex: 1; min-height: 36px; border-radius: 7px; font-size: 13.5px; font-weight: 600; color: var(--muted); transition: background 140ms ease, color 140ms ease; }
@@ -946,7 +940,7 @@
           <div class="panel-header">
             <div>
               <div class="panel-title">Candidate profile</div>
-              <p class="panel-note">Used to generate your cover letters and application emails.</p>
+              <p class="panel-note">Used to generate your cover letters and application emails. Your experience is read from your uploaded CVs.</p>
             </div>
           </div>
           <form id="profileForm" class="panel-pad" autocomplete="off">
@@ -954,10 +948,6 @@
               <div class="field">
                 <label for="profileName">Name <span class="muted">(required)</span></label>
                 <input id="profileName" name="name" placeholder="Your full name">
-              </div>
-              <div class="field">
-                <label for="profileHeadline">Headline</label>
-                <input id="profileHeadline" name="headline" placeholder="Senior designer, Backend engineer, Product lead">
               </div>
               <div class="field full">
                 <label for="profileAddress">Address <span class="muted">(required)</span></label>
@@ -980,28 +970,9 @@
                 <input id="profileLanguages" name="languages" placeholder="German native, English fluent">
               </div>
               <div class="field full">
-                <label for="profileSkills">Skills</label>
-                <textarea id="profileSkills" name="skills" placeholder="Core skills, tools, domains, certifications"></textarea>
-              </div>
-              <div class="field full">
-                <label for="profileSummary">Summary</label>
-                <textarea id="profileSummary" name="summary" placeholder="Short professional background and strengths"></textarea>
-              </div>
-              <div class="field full">
                 <label for="profilePreferences">Application preferences</label>
                 <textarea id="profilePreferences" name="preferences" placeholder="Tone, salary range, remote policy, topics to avoid, relocation limits"></textarea>
               </div>
-            </div>
-
-            <div style="margin-top:24px;">
-              <div class="panel-header" style="padding:0 0 14px; border-bottom:1px solid var(--line);">
-                <div>
-                  <div class="panel-title">Employers</div>
-                  <p class="panel-note">Real positions used to ground generated letters. Never invented.</p>
-                </div>
-                <button class="btn small" type="button" id="addEmployer">Add employer</button>
-              </div>
-              <div id="employerList" class="emp-list" style="margin-top:16px;"></div>
             </div>
 
             <div class="form-actions">
@@ -1106,7 +1077,7 @@
           <input id="reqEmail" name="email" type="email" required>
         </div>
       </div>
-      <div class="notice warn" style="margin-top:16px;">You can fill in the rest of your profile (skills, employers, summary) later under Profile.</div>
+      <div class="notice warn" style="margin-top:16px;">You can fill in the rest of your profile and upload your CVs later - your experience is read from the CVs you upload.</div>
       <div class="form-actions">
         <button class="btn primary" type="submit" id="reqProfileSubmit">Save and continue</button>
       </div>
@@ -1154,8 +1125,6 @@
   let profile = null;
   let cvs = [];
   let applications = [];
-  let employers = []; // working copy for the profile editor
-
   let currentTab = "tracker";
   let searchTerm = "";
   let statusFilter = "all";
@@ -1186,8 +1155,6 @@
     focusList: document.getElementById("focusList"),
     cvList: document.getElementById("cvList"),
     profileForm: document.getElementById("profileForm"),
-    employerList: document.getElementById("employerList"),
-    addEmployer: document.getElementById("addEmployer"),
     profileSubmit: document.getElementById("profileSubmit"),
     cvForm: document.getElementById("cvForm"),
     cvSubmit: document.getElementById("cvSubmit"),
@@ -1386,7 +1353,6 @@
   /* ---------- Loaders ---------- */
   async function loadProfile() {
     profile = await api("/api/profile");
-    employers = Array.isArray(profile.employers) ? profile.employers.map((e) => ({ ...e })) : [];
   }
   async function loadCvs() { cvs = await api("/api/cvs") || []; }
   async function loadApplications() { applications = await api("/api/applications") || []; }
@@ -1445,19 +1411,14 @@
       address: base.address || "",
       phone: base.phone || "",
       email: base.email || "",
-      headline: base.headline || "",
       languages: base.languages || "",
       availability: base.availability || "",
-      skills: base.skills || "",
-      summary: base.summary || "",
       preferences: base.preferences || "",
-      employers: Array.isArray(base.employers) ? base.employers : [],
       ...overrides,
     };
   }
   async function saveProfilePayload(overrides) {
     profile = await api("/api/profile", { method: "PUT", json: currentProfilePayload(overrides) });
-    employers = Array.isArray(profile.employers) ? profile.employers.map((e) => ({ ...e })) : [];
     renderProfileForm();
   }
 
@@ -1707,72 +1668,17 @@
   function renderProfileForm() {
     const p = profile || {};
     setValue("profileName", p.name);
-    setValue("profileHeadline", p.headline);
     setValue("profileAddress", p.address);
     setValue("profilePhone", p.phone);
     setValue("profileEmail", p.email);
     setValue("profileAvailability", p.availability);
     setValue("profileLanguages", p.languages);
-    setValue("profileSkills", p.skills);
-    setValue("profileSummary", p.summary);
     setValue("profilePreferences", p.preferences);
-    renderEmployers();
-  }
-
-  function renderEmployers() {
-    if (!employers.length) {
-      refs.employerList.innerHTML = `<p class="muted" style="font-size:13.5px;">No employers added yet. Add your real positions so generated letters can cite genuine experience.</p>`;
-      return;
-    }
-    refs.employerList.innerHTML = employers.map((emp, i) => `
-      <div class="emp-row" data-emp="${i}">
-        <div class="emp-head">
-          <span class="lbl">Employer ${i + 1}</span>
-          <button class="btn small danger" type="button" data-emp-remove="${i}">Remove</button>
-        </div>
-        <div class="form-grid">
-          <div class="field">
-            <label>Company / employer</label>
-            <input data-emp-field="name" value="${escapeHtml(emp.name || "")}" placeholder="Employer name">
-          </div>
-          <div class="field">
-            <label>Role</label>
-            <input data-emp-field="role" value="${escapeHtml(emp.role || "")}" placeholder="Your title">
-          </div>
-          <div class="field">
-            <label>Start</label>
-            <input data-emp-field="start" value="${escapeHtml(emp.start || "")}" placeholder="2021-03 or March 2021">
-          </div>
-          <div class="field">
-            <label>End</label>
-            <input data-emp-field="end" value="${escapeHtml(emp.end || "")}" placeholder="present">
-          </div>
-          <div class="field full">
-            <label>Highlights (one per line)</label>
-            <textarea data-emp-field="highlights" placeholder="Concrete achievements, responsibilities, results">${escapeHtml((emp.highlights || []).join("\n"))}</textarea>
-          </div>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function syncEmployersFromDom() {
-    employers = Array.from(refs.employerList.querySelectorAll(".emp-row")).map((row) => {
-      const get = (f) => row.querySelector(`[data-emp-field="${f}"]`)?.value || "";
-      return {
-        name: get("name").trim(),
-        role: get("role").trim(),
-        start: get("start").trim(),
-        end: get("end").trim(),
-        highlights: get("highlights").split("\n").map((s) => s.trim()).filter(Boolean),
-      };
-    });
   }
 
   /* ---------- Profile save ---------- */
   async function handleProfileSubmit(event) {
     event.preventDefault();
-    syncEmployersFromDom();
     const fd = new FormData(refs.profileForm);
     setLoading(refs.profileSubmit, true, "Saving...");
     try {
@@ -1783,16 +1689,11 @@
           address: String(fd.get("address") || "").trim(),
           phone: String(fd.get("phone") || "").trim(),
           email: String(fd.get("email") || "").trim(),
-          headline: String(fd.get("headline") || "").trim(),
           languages: String(fd.get("languages") || "").trim(),
           availability: String(fd.get("availability") || "").trim(),
-          skills: String(fd.get("skills") || "").trim(),
-          summary: String(fd.get("summary") || "").trim(),
           preferences: String(fd.get("preferences") || "").trim(),
-          employers,
         },
       });
-      employers = Array.isArray(profile.employers) ? profile.employers.map((e) => ({ ...e })) : [];
       renderProfileForm();
       toast("Profile saved.", "success");
     } catch (e) {
@@ -2236,20 +2137,6 @@
   refs.profileForm.addEventListener("submit", handleProfileSubmit);
   refs.cvForm.addEventListener("submit", handleCvSubmit);
   refs.intakeForm.addEventListener("submit", handleIntakeSubmit);
-
-  refs.addEmployer.addEventListener("click", () => {
-    syncEmployersFromDom();
-    employers.push({ name: "", role: "", start: "", end: "", highlights: [] });
-    renderEmployers();
-  });
-
-  refs.employerList.addEventListener("click", (event) => {
-    const rm = event.target.closest("[data-emp-remove]");
-    if (!rm) return;
-    syncEmployersFromDom();
-    employers.splice(Number(rm.dataset.empRemove), 1);
-    renderEmployers();
-  });
 
   refs.nav.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-tab]");

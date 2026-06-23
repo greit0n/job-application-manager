@@ -6,8 +6,6 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
-
-logger = logging.getLogger(__name__)
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -21,6 +19,8 @@ from ..schemas import CVOut, CVUpdate
 from ..services.ai_client import get_ai_client
 from ..services.cv_text import ensure_cv_text
 from ..services.storage import get_storage
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/cvs", tags=["cvs"])
 

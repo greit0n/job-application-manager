@@ -69,6 +69,9 @@ The Motivationsschreiben quality comes from the rules in
 - **Letters are AI-written per job, not templated.** Narrative arc: (1) interest +
   bridge from job requirements to real experience, (2) concrete experience at the
   candidate's real employers, (3) enthusiastic, company-specific close.
+  **Experience, employers, education, and skills are drawn exclusively from the
+  candidate's uploaded CV text** (`CVVariant.extracted_text`) — the CV is the sole
+  source of truth; the profile supplies only name/address/contact/languages/availability.
 - **Never invent** experience, employers, credentials, education, or compensation. Frame
   gaps honestly ("konzeptionell vertraut, würde formal ausbauen").
 - **Never mention AMS** or that the candidate was told/required to apply — always frame as

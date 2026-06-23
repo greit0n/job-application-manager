@@ -308,3 +308,82 @@ def test_model_shape_cv_text_and_dropped_profile_fields():
     assert hasattr(CVVariant, "extracted_text")
     for gone in ("headline", "skills", "summary", "employers"):
         assert not hasattr(Profile, gone), f"Profile.{gone} should be removed"
+
+
+# ---------------------------------------------------------------------------
+# 7. cv_text module
+# ---------------------------------------------------------------------------
+
+
+def _make_text_pdf(text: str) -> bytes:
+    """Build a one-page PDF with a real text layer using ReportLab (already a dep)."""
+    import io
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    c.drawString(72, 800, text)
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+class _FakeAI:
+    def complete(self, prompt, *, system=None, files=None, timeout=None):
+        return "AI TRANSCRIBED CV"
+
+    def complete_json(self, prompt, *, system=None, files=None, timeout=None):
+        return {}
+
+
+def test_extract_cv_text_reads_pdf_text_layer():
+    from app.services.cv_text import extract_cv_text
+
+    data = _make_text_pdf("Senior Engineer at Fezle since 2023")
+    out = extract_cv_text(data, "cv.pdf", _FakeAI())
+    assert "Senior Engineer at Fezle" in out
+
+
+def test_extract_cv_text_falls_back_to_ai_when_no_text_layer():
+    from app.services.cv_text import extract_cv_text
+
+    # Not a real PDF -> pdfplumber raises IntakeError -> AI fallback.
+    out = extract_cv_text(b"not-a-real-pdf", "cv.pdf", _FakeAI())
+    assert out == "AI TRANSCRIBED CV"
+
+
+def test_extract_cv_text_returns_empty_without_ai_fallback():
+    from app.services.cv_text import extract_cv_text
+
+    out = extract_cv_text(b"not-a-real-pdf", "cv.pdf", ai=None)
+    assert out == ""
+
+
+def test_ensure_cv_text_fills_and_persists():
+    from types import SimpleNamespace
+    from app.services.cv_text import ensure_cv_text
+
+    cv = SimpleNamespace(r2_key="k", filename="cv.pdf", extracted_text="")
+    commits = {"n": 0}
+    db = SimpleNamespace(commit=lambda: commits.__setitem__("n", commits["n"] + 1))
+    storage = SimpleNamespace(get=lambda key: b"not-a-real-pdf")
+
+    out = ensure_cv_text(cv, db=db, storage=storage, ai=_FakeAI())
+    assert out == "AI TRANSCRIBED CV"
+    assert cv.extracted_text == "AI TRANSCRIBED CV"
+    assert commits["n"] == 1
+
+
+def test_ensure_cv_text_noop_when_already_present():
+    from types import SimpleNamespace
+    from app.services.cv_text import ensure_cv_text
+
+    cv = SimpleNamespace(r2_key="k", filename="cv.pdf", extracted_text="already here")
+    got = {"called": False}
+    storage = SimpleNamespace(get=lambda key: got.__setitem__("called", True))
+    db = SimpleNamespace(commit=lambda: None)
+
+    out = ensure_cv_text(cv, db=db, storage=storage, ai=_FakeAI())
+    assert out == "already here"
+    assert got["called"] is False  # storage never touched

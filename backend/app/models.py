@@ -59,14 +59,9 @@ class Profile(Base):
     address: Mapped[str] = mapped_column(String(255), default="")
     phone: Mapped[str] = mapped_column(String(60), default="")
     email: Mapped[str] = mapped_column(String(255), default="")
-    headline: Mapped[str] = mapped_column(String(255), default="")
     languages: Mapped[str] = mapped_column(String(255), default="")
     availability: Mapped[str] = mapped_column(String(255), default="")
-    skills: Mapped[str] = mapped_column(Text, default="")
-    summary: Mapped[str] = mapped_column(Text, default="")
     preferences: Mapped[str] = mapped_column(Text, default="")
-    # [{name, role, start, end, highlights:[...]}, ...] used to ground letters.
-    employers: Mapped[list] = mapped_column(JSON, default=list)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(back_populates="profile")
@@ -81,6 +76,7 @@ class CVVariant(Base):
     label: Mapped[str] = mapped_column(String(120))            # e.g. "Fullstack", "Leadership"
     language: Mapped[str] = mapped_column(String(8), default="de")
     notes: Mapped[str] = mapped_column(Text, default="")        # when to use this variant
+    extracted_text: Mapped[str] = mapped_column(Text, default="")  # CV text for grounding generation
     r2_key: Mapped[str] = mapped_column(String(512))
     filename: Mapped[str] = mapped_column(String(255))
     mime: Mapped[str] = mapped_column(String(120), default="application/pdf")

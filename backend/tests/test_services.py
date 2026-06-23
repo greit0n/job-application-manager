@@ -300,3 +300,11 @@ def test_intake_bogus_mode_raises():
     assert hasattr(intake, "IntakeError")
     with pytest.raises(intake.IntakeError):
         intake.intake(mode="bogus", text="whatever")
+
+
+def test_model_shape_cv_text_and_dropped_profile_fields():
+    from app.models import CVVariant, Profile
+
+    assert hasattr(CVVariant, "extracted_text")
+    for gone in ("headline", "skills", "summary", "employers"):
+        assert not hasattr(Profile, gone), f"Profile.{gone} should be removed"

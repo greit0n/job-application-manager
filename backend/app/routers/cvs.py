@@ -5,14 +5,18 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
+from ..config import get_settings
 from ..db import get_db
 from ..downloads import download_response
 from ..models import CVVariant, User
 from ..schemas import CVOut, CVUpdate
+from ..services.ai_client import get_ai_client
+from ..services.cv_text import ensure_cv_text
 from ..services.storage import get_storage
 
 router = APIRouter(prefix="/cvs", tags=["cvs"])
@@ -67,6 +71,23 @@ async def upload_cv(
     db.add(cv)
     db.commit()
     db.refresh(cv)
+
+    # Cache the CV's text now so generation can ground on it. Best-effort: a
+    # failure here just leaves extracted_text empty; it is retried lazily at
+    # generation time. Run off the event loop (blocking R2 + pdfplumber + CLI).
+    try:
+        await run_in_threadpool(
+            ensure_cv_text,
+            cv,
+            db=db,
+            storage=get_storage(),
+            ai=get_ai_client(),
+            timeout=get_settings().claude_timeout,
+        )
+    except Exception:
+        pass
+    db.refresh(cv)
+
     return cv
 
 

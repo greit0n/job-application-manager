@@ -28,12 +28,11 @@ def test_profile_upsert(client):
     assert client.get("/api/profile").json()["name"] == ""
     resp = client.put(
         "/api/profile",
-        json={"name": "Georgi", "phone": "+43", "employers": [{"name": "Fezle", "role": "Founder"}]},
+        json={"name": "Georgi", "phone": "+43"},
     )
     assert resp.status_code == 200
     body = resp.json()
     assert body["name"] == "Georgi"
-    assert body["employers"][0]["name"] == "Fezle"
     # persisted
     assert client.get("/api/profile").json()["name"] == "Georgi"
 
@@ -85,3 +84,22 @@ def test_user_scoping(client):
     login(client, "b@example.com", "pw-b")
     assert client.get(f"/api/applications/{app_id}").status_code == 404
     assert client.get("/api/applications").json() == []
+
+
+def test_profile_drops_content_fields(client):
+    login(client)
+    resp = client.put(
+        "/api/profile",
+        json={
+            "name": "Georgi", "address": "Wien", "phone": "+43", "email": "g@example.com",
+            "languages": "German native", "availability": "Immediate",
+            "preferences": "Remote ok",
+            # legacy keys a stale client might still send — must be ignored, not stored:
+            "headline": "X", "skills": "Y", "summary": "Z", "employers": [{"name": "Old"}],
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["name"] == "Georgi"
+    for gone in ("headline", "skills", "summary", "employers"):
+        assert gone not in body

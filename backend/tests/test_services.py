@@ -96,10 +96,12 @@ def make_cvs():
         types.SimpleNamespace(
             id=10, label="Fullstack", language="de",
             notes="Fuer breite Rollen", filename="cv_fullstack.pdf", is_default=True,
+            extracted_text="Senior Developer at Litenweb GmbH since 2020.",
         ),
         types.SimpleNamespace(
             id=11, label="Leadership", language="de",
             notes="Fuer Fuehrungsrollen", filename="cv_leadership.pdf", is_default=False,
+            extracted_text="Tech Lead at Litenweb GmbH, 2022-2024.",
         ),
     ]
 
@@ -203,7 +205,8 @@ def test_build_messages_includes_identity_language_and_no_ams():
     combined = (system or "") + "\n" + (user or "")
 
     assert profile.name in combined
-    assert profile.employers[0]["name"] in combined
+    # CV extracted_text is the grounding source (employers block removed in Task 4).
+    assert cvs[0].extracted_text in combined
     # target language mentioned somewhere
     assert ("de" in combined.lower()) or ("german" in combined.lower()) or ("deutsch" in combined.lower())
     # The user-facing prompt (job-specific content) must never reference AMS.
@@ -300,3 +303,135 @@ def test_intake_bogus_mode_raises():
     assert hasattr(intake, "IntakeError")
     with pytest.raises(intake.IntakeError):
         intake.intake(mode="bogus", text="whatever")
+
+
+def test_model_shape_cv_text_and_dropped_profile_fields():
+    from app.models import CVVariant, Profile
+
+    assert hasattr(CVVariant, "extracted_text")
+    for gone in ("headline", "skills", "summary", "employers"):
+        assert not hasattr(Profile, gone), f"Profile.{gone} should be removed"
+
+
+# ---------------------------------------------------------------------------
+# 7. cv_text module
+# ---------------------------------------------------------------------------
+
+
+def _make_text_pdf(text: str) -> bytes:
+    """Build a one-page PDF with a real text layer using ReportLab (already a dep)."""
+    import io
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.pagesizes import A4
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    c.drawString(72, 800, text)
+    c.showPage()
+    c.save()
+    return buf.getvalue()
+
+
+class _FakeAI:
+    def complete(self, prompt, *, system=None, files=None, timeout=None):
+        return "AI TRANSCRIBED CV"
+
+    def complete_json(self, prompt, *, system=None, files=None, timeout=None):
+        return {}
+
+
+def test_extract_cv_text_reads_pdf_text_layer():
+    from app.services.cv_text import extract_cv_text
+
+    data = _make_text_pdf("Senior Engineer at Fezle since 2023")
+    out = extract_cv_text(data, "cv.pdf", _FakeAI())
+    assert "Senior Engineer at Fezle" in out
+
+
+def test_extract_cv_text_falls_back_to_ai_when_no_text_layer():
+    from app.services.cv_text import extract_cv_text
+
+    # Not a real PDF -> pdfplumber raises IntakeError -> AI fallback.
+    out = extract_cv_text(b"not-a-real-pdf", "cv.pdf", _FakeAI())
+    assert out == "AI TRANSCRIBED CV"
+
+
+def test_extract_cv_text_returns_empty_without_ai_fallback():
+    from app.services.cv_text import extract_cv_text
+
+    out = extract_cv_text(b"not-a-real-pdf", "cv.pdf", ai=None)
+    assert out == ""
+
+
+def test_ensure_cv_text_fills_and_persists():
+    from types import SimpleNamespace
+    from app.services.cv_text import ensure_cv_text
+
+    cv = SimpleNamespace(r2_key="k", filename="cv.pdf", extracted_text="")
+    commits = {"n": 0}
+    db = SimpleNamespace(commit=lambda: commits.__setitem__("n", commits["n"] + 1))
+    storage = SimpleNamespace(get=lambda key: b"not-a-real-pdf")
+
+    out = ensure_cv_text(cv, db=db, storage=storage, ai=_FakeAI())
+    assert out == "AI TRANSCRIBED CV"
+    assert cv.extracted_text == "AI TRANSCRIBED CV"
+    assert commits["n"] == 1
+
+
+def test_ensure_cv_text_noop_when_already_present():
+    from types import SimpleNamespace
+    from app.services.cv_text import ensure_cv_text
+
+    cv = SimpleNamespace(r2_key="k", filename="cv.pdf", extracted_text="already here")
+    got = {"called": False}
+    storage = SimpleNamespace(get=lambda key: got.__setitem__("called", True))
+    db = SimpleNamespace(commit=lambda: None)
+
+    out = ensure_cv_text(cv, db=db, storage=storage, ai=_FakeAI())
+    assert out == "already here"
+    assert got["called"] is False  # storage never touched
+
+
+def test_extract_cv_text_oserror_in_ai_fallback_returns_empty(monkeypatch):
+    """Fix 1 regression: a raw OSError from extract_image_text must not propagate."""
+    import app.services.cv_text as cv_text_mod
+    import app.services.intake as intake_mod
+
+    monkeypatch.setattr(intake_mod, "extract_image_text", lambda *a, **kw: (_ for _ in ()).throw(OSError("boom")))
+
+    # non-PDF bytes -> pdfplumber raises IntakeError -> AI fallback -> OSError should be swallowed
+    out = cv_text_mod.extract_cv_text(b"not-a-real-pdf", "cv.pdf", object())
+    assert out == ""
+
+
+def test_build_messages_grounds_on_cv_text_not_employers():
+    from types import SimpleNamespace
+    from app.services.generation import build_messages
+
+    profile = SimpleNamespace(
+        name="Georgi", address="Wien", phone="+43", email="g@example.com",
+        languages="German native", availability="Immediate", preferences="Remote ok",
+    )
+    application = SimpleNamespace(
+        company="Acme", position="Engineer", job_text="We need Python.",
+        location="", salary="", url="",
+    )
+    cvs = [
+        SimpleNamespace(label="Fullstack", language="de", notes="hands-on",
+                        extracted_text="Worked at Fezle building SaaS in Python."),
+        SimpleNamespace(label="Leadership", language="de", notes="lead roles",
+                        extracted_text="Led a team of five at Fezle."),
+    ]
+    system, user = build_messages(
+        profile=profile, application=application, cvs=cvs, language="de",
+        produce_letter=True, produce_email=True,
+    )
+    # CV text is present for grounding...
+    assert "Worked at Fezle building SaaS in Python." in user
+    assert "Led a team of five at Fezle." in user
+    # ...and the recommendation labels are still there.
+    assert "Fullstack" in user and "Leadership" in user
+    # No employers section header anymore.
+    assert "EMPLOYERS" not in user.upper()
+    # Grounding rule references the CV as the source.
+    assert "CV" in system

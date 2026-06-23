@@ -25,6 +25,7 @@ from ..services import generation as gen_svc
 from ..services import intake as intake_svc
 from ..services import pdf as pdf_svc
 from ..services.ai_client import AIClient, get_ai_client
+from ..services.cv_text import ensure_cv_text
 from ..services.storage import get_storage
 
 router = APIRouter(prefix="/applications", tags=["ai"])
@@ -182,6 +183,28 @@ def generate_documents(
             detail="Complete your profile (name and address) before generating a letter.",
         )
 
+    # Lazily backfill CV text for any variant uploaded before extraction existed
+    # (self-healing) so grounding has the real experience to draw on.
+    storage = get_storage()
+    for cv in cvs:
+        if not (cv.extracted_text or "").strip():
+            ensure_cv_text(
+                cv,
+                db=db,
+                storage=storage,
+                ai=ai,
+                timeout=get_settings().claude_timeout,
+            )
+
+    # Generation grounds entirely on CV text now - refuse if there is none.
+    if (payload.produce_letter or payload.produce_email) and not any(
+        (cv.extracted_text or "").strip() for cv in cvs
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Upload a CV with readable text before generating documents.",
+        )
+
     try:
         result = gen_svc.generate(
             ai,
@@ -262,7 +285,6 @@ def generate_documents(
     # Render the new documents IN MEMORY first; only once they (and their uploads)
     # succeed do we delete the previous generated files. A render or storage failure
     # then leaves the prior good output intact rather than wiping it.
-    storage = get_storage()
     company_slug = _slug(app.company or extracted.get("company") or "")
     pending: list[tuple[str, bytes, str, str]] = []  # (kind, data, filename, mime)
 

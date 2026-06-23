@@ -28,13 +28,9 @@ class ProfileIn(BaseModel):
     address: str = ""
     phone: str = ""
     email: str = ""
-    headline: str = ""
     languages: str = ""
     availability: str = ""
-    skills: str = ""
-    summary: str = ""
     preferences: str = ""
-    employers: list[dict] = Field(default_factory=list)
 
 
 class ProfileOut(ProfileIn, ORMModel):

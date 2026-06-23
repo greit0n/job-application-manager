@@ -56,44 +56,17 @@ def _s(value: Any) -> str:
 # --------------------------------------------------------------------------- #
 # Prompt assembly
 # --------------------------------------------------------------------------- #
-def _format_employers(employers: Any) -> str:
-    """Render profile.employers (a JSON list of dicts) readably for the prompt."""
-    if not employers:
-        return "(no employers on file)"
-    lines: list[str] = []
-    if not isinstance(employers, list):
-        return _s(employers)
-    for emp in employers:
-        if not isinstance(emp, dict):
-            lines.append(f"- {_s(emp)}")
-            continue
-        name = _s(emp.get("name"))
-        role = _s(emp.get("role"))
-        start = _s(emp.get("start"))
-        end = _s(emp.get("end"))
-        dates = ""
-        if start or end:
-            dates = f" ({start} - {end})" if (start and end) else f" ({start or end})"
-        header_bits = [b for b in (name, role) if b]
-        header = " - ".join(header_bits) if header_bits else "(unnamed role)"
-        lines.append(f"- {header}{dates}")
-        highlights = emp.get("highlights")
-        if isinstance(highlights, list):
-            for h in highlights:
-                h = _s(h)
-                if h:
-                    lines.append(f"    * {h}")
-        elif highlights:
-            lines.append(f"    * {_s(highlights)}")
-    return "\n".join(lines) if lines else "(no employers on file)"
-
 
 def _format_cvs(cvs: Any) -> tuple[str, list[str]]:
-    """Render CV variants for the prompt and return (text, labels)."""
+    """Render CV variants (label + notes + full text) for the prompt.
+
+    The text grounds the letter's experience claims; the labels are the menu the
+    model recommends from. Returns (text, labels).
+    """
     labels: list[str] = []
     if not cvs:
         return "(no CV variants on file - recommend nothing)", labels
-    lines: list[str] = []
+    blocks: list[str] = []
     for cv in cvs:
         label = _s(getattr(cv, "label", ""))
         if not label:
@@ -101,11 +74,14 @@ def _format_cvs(cvs: Any) -> tuple[str, list[str]]:
         labels.append(label)
         lang = _s(getattr(cv, "language", ""))
         notes = _s(getattr(cv, "notes", "")) or "(no notes)"
+        text = _s(getattr(cv, "extracted_text", "")) or "(no text extracted from this CV)"
         lang_part = f" [language: {lang}]" if lang else ""
-        lines.append(f'- "{label}"{lang_part}: {notes}')
-    if not lines:
+        blocks.append(
+            f'--- CV "{label}"{lang_part} - when to use: {notes} ---\n{text}'
+        )
+    if not blocks:
         return "(no CV variants on file - recommend nothing)", labels
-    return "\n".join(lines), labels
+    return "\n\n".join(blocks), labels
 
 
 def _profile_block(profile: Any) -> str:
@@ -114,11 +90,8 @@ def _profile_block(profile: Any) -> str:
         ("Address", _s(getattr(profile, "address", ""))),
         ("Phone", _s(getattr(profile, "phone", ""))),
         ("Email", _s(getattr(profile, "email", ""))),
-        ("Headline", _s(getattr(profile, "headline", ""))),
         ("Languages", _s(getattr(profile, "languages", ""))),
         ("Availability", _s(getattr(profile, "availability", ""))),
-        ("Skills", _s(getattr(profile, "skills", ""))),
-        ("Summary", _s(getattr(profile, "summary", ""))),
         ("Preferences", _s(getattr(profile, "preferences", ""))),
     ]
     return "\n".join(f"{k}: {v}" for k, v in fields if v) or "(no profile data)"
@@ -153,10 +126,10 @@ def _system_prompt(language: str) -> str:
             "freshly for the specific job - never from a template.",
             "",
             "GROUNDING RULES (absolute):",
-            "- Base EVERYTHING only on the supplied candidate profile and employers list. "
-            "NEVER invent experience, employers, job titles, education, certifications, "
-            "credentials, skills or compensation. If the candidate lacks something the job "
-            "wants, frame the gap honestly (e.g. conceptually familiar, would formally "
+            "- The candidate's CV(s), reproduced in full below, are your ONLY source for "
+            "experience, employers, job titles, education, certifications, credentials and "
+            "skills. NEVER invent anything beyond them. If the candidate lacks something the "
+            "job wants, frame the gap honestly (e.g. conceptually familiar, would formally "
             "build it up) instead of fabricating.",
             "- NEVER mention 'AMS', a job centre, or that the candidate was told, required "
             "or advised to apply. Always frame the application as genuine personal interest.",
@@ -166,8 +139,8 @@ def _system_prompt(language: str) -> str:
             "LETTER CRAFT - follow this narrative arc:",
             "1. Open with genuine, specific interest in this company/role and bridge from "
             "the job's concrete requirements to the candidate's REAL experience.",
-            "2. Develop with concrete experience at the candidate's actual employers (use "
-            "the employers list), tying achievements to what the job needs.",
+            "2. Develop with concrete experience at the candidate's actual employers (drawn "
+            "from the CV text), tying achievements to what the job needs.",
             "3. Close with an enthusiastic, company-specific paragraph.",
             "The letter MUST contain its own salutation at the top and its own closing - "
             "the PDF renderer adds only the sender block, date and subject around your text.",
@@ -221,7 +194,6 @@ def build_messages(
     system = _system_prompt(language)
 
     profile_block = _profile_block(profile)
-    employers_block = _format_employers(getattr(profile, "employers", None))
     cv_block, _labels = _format_cvs(cvs)
 
     company = _s(getattr(application, "company", ""))
@@ -285,16 +257,13 @@ def build_messages(
             "=== CANDIDATE PROFILE ===",
             profile_block,
             "",
-            "=== CANDIDATE EMPLOYERS (real work history - your only source for experience) ===",
-            employers_block,
-            "",
             "=== KNOWN APPLICATION FACTS ===",
             known_block,
             "",
             "=== JOB POSTING TEXT ===",
             posting_section,
             "",
-            "=== AVAILABLE CV VARIANTS (recommend the best-fitting label) ===",
+            "=== CANDIDATE CVs (full text - your ONLY source for real experience; also recommend the best-fitting label) ===",
             cv_block,
             extra_block,
             "=== WHAT TO PRODUCE ===",

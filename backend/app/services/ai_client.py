@@ -93,6 +93,7 @@ class ClaudeCodeClient(AIClient):
         self.bin = settings.claude_bin
         self.token = settings.claude_code_oauth_token
         self.model = settings.claude_model
+        self.effort = settings.claude_effort
         self.default_timeout = settings.claude_timeout
 
     def complete(
@@ -116,6 +117,8 @@ class ClaudeCodeClient(AIClient):
         cmd = [self.bin, "-p", full_prompt, "--output-format", "json"]
         if self.model:
             cmd += ["--model", self.model]
+        if self.effort:
+            cmd += ["--effort", self.effort]
         if files:
             cmd += ["--allowedTools", "Read"]
 

@@ -1,10 +1,13 @@
 """CV variant management (upload / list / edit / delete / download)."""
 from __future__ import annotations
 
+import logging
 import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
+
+logger = logging.getLogger(__name__)
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -85,7 +88,7 @@ async def upload_cv(
             timeout=get_settings().claude_timeout,
         )
     except Exception:
-        pass
+        logger.warning("CV text extraction on upload failed for cv_id=%s", cv.id, exc_info=True)
     db.refresh(cv)
 
     return cv

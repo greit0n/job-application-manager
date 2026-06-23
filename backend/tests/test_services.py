@@ -392,6 +392,18 @@ def test_ensure_cv_text_noop_when_already_present():
     assert got["called"] is False  # storage never touched
 
 
+def test_extract_cv_text_oserror_in_ai_fallback_returns_empty(monkeypatch):
+    """Fix 1 regression: a raw OSError from extract_image_text must not propagate."""
+    import app.services.cv_text as cv_text_mod
+    import app.services.intake as intake_mod
+
+    monkeypatch.setattr(intake_mod, "extract_image_text", lambda *a, **kw: (_ for _ in ()).throw(OSError("boom")))
+
+    # non-PDF bytes -> pdfplumber raises IntakeError -> AI fallback -> OSError should be swallowed
+    out = cv_text_mod.extract_cv_text(b"not-a-real-pdf", "cv.pdf", object())
+    assert out == ""
+
+
 def test_build_messages_grounds_on_cv_text_not_employers():
     from types import SimpleNamespace
     from app.services.generation import build_messages

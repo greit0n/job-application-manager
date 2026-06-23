@@ -37,6 +37,8 @@ def extract_cv_text(
         return intake_svc.extract_image_text(data, filename, ai, timeout=timeout)
     except intake_svc.IntakeError:
         return ""
+    except Exception:
+        return ""
 
 
 def ensure_cv_text(

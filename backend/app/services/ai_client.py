@@ -9,6 +9,7 @@ changes -- if subscription limits or terms ever become a problem.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 from abc import ABC, abstractmethod
@@ -118,7 +119,9 @@ class ClaudeCodeClient(AIClient):
         if files:
             cmd += ["--allowedTools", "Read"]
 
-        env = {"PATH": _system_path()}
+        # Inherit the parent environment (HOME, PATH, XDG_* etc. - the CLI needs
+        # them for its config/cache) and override only the auth token.
+        env = dict(os.environ)
         if self.token:
             env["CLAUDE_CODE_OAUTH_TOKEN"] = self.token
 

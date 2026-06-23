@@ -57,7 +57,7 @@ def _get_or_create_profile(db: Session, user: User) -> Profile:
     return user.profile
 
 
-def _slug(value: str, fallback: str = "Bewerbung") -> str:
+def _slug(value: str, fallback: str = "Application") -> str:
     cleaned = re.sub(r"[^\w\s-]", "", value or "", flags=re.UNICODE).strip()
     cleaned = re.sub(r"[\s]+", "_", cleaned)
     return cleaned or fallback
@@ -286,7 +286,7 @@ def generate_documents(
                 language=language,
             )
             pending.append(
-                ("motivation_letter", pdf_bytes, f"Motivationsschreiben_{company_slug}.pdf", "application/pdf")
+                ("motivation_letter", pdf_bytes, f"Cover_Letter_{company_slug}.pdf", "application/pdf")
             )
 
         if payload.produce_email and (app.email_body.strip() or app.email_subject.strip()):
@@ -391,7 +391,7 @@ def bundle_documents(
             db.delete(doc)
     db.commit()
 
-    fn = f"Bewerbung_{_slug(app.company)}.zip"
+    fn = f"Application_{_slug(app.company)}.zip"
     key = f"{user.id}/app-{app.id}/zip/{uuid.uuid4().hex}_{fn}"
     storage.put(key, zip_bytes, content_type="application/zip")
     doc = Document(

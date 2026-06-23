@@ -946,7 +946,7 @@
           <div class="panel-header">
             <div>
               <div class="panel-title">Candidate profile</div>
-              <p class="panel-note">Used to generate your Motivationsschreiben and application emails.</p>
+              <p class="panel-note">Used to generate your cover letters and application emails.</p>
             </div>
           </div>
           <form id="profileForm" class="panel-pad" autocomplete="off">
@@ -1124,12 +1124,12 @@
   const THEME_KEY = "jobApplicationManager:theme";
 
   const statuses = [
-    { key: "pending", label: "Pending (offen)" },
-    { key: "applied", label: "Applied (beworben)" },
-    { key: "interview", label: "Interview (Gespräch)" },
-    { key: "offer", label: "Offer (Angebot)" },
-    { key: "rejected", label: "Rejected (abgelehnt)" },
-    { key: "filled", label: "Filled (besetzt)" },
+    { key: "pending", label: "Pending" },
+    { key: "applied", label: "Applied" },
+    { key: "interview", label: "Interview" },
+    { key: "offer", label: "Offer" },
+    { key: "rejected", label: "Rejected" },
+    { key: "filled", label: "Filled" },
   ];
   const STATUS_KEYS = statuses.map((s) => s.key);
 
@@ -1143,7 +1143,7 @@
   const docKindLabels = {
     posting: "Job posting",
     cv: "CV",
-    motivation_letter: "Motivationsschreiben",
+    motivation_letter: "Cover letter",
     email: "Application email",
     zip: "ZIP bundle",
     proof: "Proof",
@@ -1244,7 +1244,7 @@
   }
 
   function statusLabel(key) {
-    return statuses.find((item) => item.key === key)?.label || "Pending (offen)";
+    return statuses.find((item) => item.key === key)?.label || "Pending";
   }
 
   function cvLabelById(id) {
@@ -1972,7 +1972,7 @@
       <div class="detail-block">
         <h4>Generated documents (editable)</h4>
         <div class="field">
-          <label for="edLetter">Motivationsschreiben</label>
+          <label for="edLetter">Cover letter</label>
           <textarea id="edLetter" style="min-height:220px;">${escapeHtml(app.motivation_letter || "")}</textarea>
         </div>
         <div style="height:12px;"></div>
@@ -2036,7 +2036,7 @@
 
       <div class="detail-block">
         <h4>Generate documents</h4>
-        <div class="ck-row"><input type="checkbox" id="genLetter" checked><label for="genLetter">Motivationsschreiben</label></div>
+        <div class="ck-row"><input type="checkbox" id="genLetter" checked><label for="genLetter">Cover letter</label></div>
         <div class="ck-row"><input type="checkbox" id="genEmail" checked><label for="genEmail">Application email</label></div>
         <div class="field" style="margin-top:10px;max-width:220px;">
           <label for="genLang">Language</label>

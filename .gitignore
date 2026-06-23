@@ -1,4 +1,13 @@
-# Private user data
+# ─── Secrets & config (NEVER commit) ───────────────────────────────
+.env
+.env.*
+!.env.example
+backend/.env
+*.pem
+*.key
+secrets/
+
+# ─── Private user data (CVs, letters, postings, backups, proofs) ────
 *.pdf
 *.doc
 *.docx
@@ -12,16 +21,12 @@
 *.bmp
 *.json
 *.zip
-
-# Allow package metadata only if future development adds it intentionally
-!package.json
-!package-lock.json
-
-# Common private export names
 *backup*
 *Backup*
 *export*
 *Export*
+uploads/
+local-uploads/
 applications/
 Applications/
 proofs/
@@ -39,17 +44,33 @@ Local/
 tmp/
 temp/
 
-# OS and editor noise
+# Allow the bundled brand logo and machine-readable metadata only
+!frontend/assets/
+!frontend/assets/logo.png
+!package.json
+!package-lock.json
+
+# ─── Python backend ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ─── Node / tooling ────────────────────────────────────────────────
+node_modules/
+playwright-report/
+test-results/
+coverage/
+output/
+.playwright-mcp/
+
+# ─── OS & editor noise ─────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 desktop.ini
 .vscode/
 .idea/
-
-# Automation and test artifacts
-.playwright-mcp/
-output/
-playwright-report/
-test-results/
-coverage/
-node_modules/

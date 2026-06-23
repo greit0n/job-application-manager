@@ -1,0 +1,302 @@
+"""Offline, deterministic tests for the new service modules.
+
+These modules (pdf, bundle, generation, intake) are written concurrently by
+other agents to the contracts documented in the task. Tests use no network,
+no real AI, and no DB. A fake AI object stands in for AIClient.
+"""
+
+from __future__ import annotations
+
+import io
+import types
+import zipfile
+
+import pytest
+
+# ---------------------------------------------------------------------------
+# Fake AI (do NOT import the real AIClient ABC).
+# ---------------------------------------------------------------------------
+
+
+class FakeAI:
+    """Minimal stand-in for AIClient with deterministic, configurable output."""
+
+    def __init__(self, json_result=None, raise_exc: BaseException | None = None):
+        self._json_result = json_result if json_result is not None else {}
+        self._raise = raise_exc
+        self.calls: list[dict] = []
+
+    def complete(self, prompt, *, system=None, files=None, timeout=None):
+        self.calls.append({"prompt": prompt, "system": system, "files": files})
+        if self._raise is not None:
+            raise self._raise
+        return "fake text"
+
+    def complete_json(self, prompt, *, system=None, files=None, timeout=None):
+        self.calls.append({"prompt": prompt, "system": system, "files": files})
+        if self._raise is not None:
+            raise self._raise
+        return dict(self._json_result)
+
+
+# ---------------------------------------------------------------------------
+# Fixtures: fake ORM-like objects via SimpleNamespace.
+# ---------------------------------------------------------------------------
+
+
+def make_profile():
+    return types.SimpleNamespace(
+        name="Georg Damyanov",
+        address="Musterstrasse 1, 1010 Wien",
+        phone="+43 660 1234567",
+        email="georg@example.com",
+        headline="Fullstack Developer",
+        languages="Deutsch (Muttersprache), Englisch (fliessend)",
+        availability="ab sofort",
+        skills="Python, FastAPI, SQLAlchemy, React",
+        summary="Erfahrener Entwickler mit Fokus auf Webanwendungen.",
+        preferences="Remote bevorzugt",
+        employers=[
+            {
+                "name": "Litenweb GmbH",
+                "role": "Senior Developer",
+                "start": "2020",
+                "end": "2024",
+                "highlights": ["Backend-Architektur", "Team-Leitung"],
+            }
+        ],
+    )
+
+
+def make_application(language="de"):
+    return types.SimpleNamespace(
+        id=1,
+        company="ACME AG",
+        position="Backend Engineer",
+        status="draft",
+        language=language,
+        source="paste",
+        salary=None,
+        location="Wien",
+        url=None,
+        deadline=None,
+        notes="",
+        selected_cv_id=None,
+        job_text="Wir suchen einen Backend Engineer mit Python-Erfahrung.",
+        extracted={},
+        motivation_letter=None,
+        email_subject=None,
+        email_body=None,
+        cv_recommendation=None,
+    )
+
+
+def make_cvs():
+    return [
+        types.SimpleNamespace(
+            id=10, label="Fullstack", language="de",
+            notes="Fuer breite Rollen", filename="cv_fullstack.pdf", is_default=True,
+        ),
+        types.SimpleNamespace(
+            id=11, label="Leadership", language="de",
+            notes="Fuer Fuehrungsrollen", filename="cv_leadership.pdf", is_default=False,
+        ),
+    ]
+
+
+# ---------------------------------------------------------------------------
+# 1 & 2. pdf module
+# ---------------------------------------------------------------------------
+
+
+def test_sanitize_replaces_dashes_with_hyphen():
+    pdf = pytest.importorskip("app.services.pdf", reason="pdf service not yet available")
+    text = "alpha—beta – gamma -- delta"
+    out = pdf.sanitize(text)
+    assert "—" not in out  # em dash gone
+    assert "–" not in out  # en dash gone
+    assert "--" not in out      # double hyphen collapsed
+    assert "-" in out           # replaced with single hyphen
+    # original words survive
+    for word in ("alpha", "beta", "gamma", "delta"):
+        assert word in out
+
+
+def test_render_letter_pdf_returns_pdf_bytes_with_umlauts():
+    pdf = pytest.importorskip("app.services.pdf", reason="pdf service not yet available")
+    sender = {
+        "name": "Georg Damyanov",
+        "address": "Musterstrasse 1, 1010 Wien",
+        "phone": "+43 660 1234567",
+        "email": "georg@example.com",
+    }
+    body = (
+        "Sehr geehrte Damen und Herren,\n\n"
+        "ich moechte mich fuer die Stelle bewerben. "
+        "Ueber die Umlaute aeoeue und das scharfe szett gross."
+        "äöüß\n\nMit freundlichen Gruessen"
+    )
+    out = pdf.render_letter_pdf(
+        sender=sender,
+        subject="Bewerbung als Backend Engineer",
+        body=body,
+        date_str="23. Juni 2026",
+        language="de",
+    )
+    assert isinstance(out, (bytes, bytearray))
+    assert bytes(out).startswith(b"%PDF")
+    assert len(out) > 100
+
+
+# ---------------------------------------------------------------------------
+# 3. bundle module
+# ---------------------------------------------------------------------------
+
+
+def test_build_zip_roundtrips_skips_empty_and_dedupes():
+    bundle = pytest.importorskip("app.services.bundle", reason="bundle service not yet available")
+    files = [
+        ("letter.pdf", b"%PDF-letter"),
+        ("cv.pdf", b"%PDF-cv-content"),
+        ("empty.txt", b""),            # should be skipped
+        ("cv.pdf", b"%PDF-duplicate"), # duplicate arcname -> de-duped
+    ]
+    blob = bundle.build_zip(files)
+    assert isinstance(blob, (bytes, bytearray))
+
+    with zipfile.ZipFile(io.BytesIO(bytes(blob))) as zf:
+        names = zf.namelist()
+        # empty entry skipped
+        assert "empty.txt" not in names
+        # original non-empty present
+        assert "letter.pdf" in names
+        assert zf.read("letter.pdf") == b"%PDF-letter"
+        # de-dupe: "cv.pdf" must appear exactly once across the archive
+        assert names.count("cv.pdf") == 1
+        # no duplicate names overall
+        assert len(names) == len(set(names))
+        # the de-duped second entry (if kept under a different name) must be unique
+        for n in names:
+            assert zf.read(n)  # nothing empty made it in
+
+
+# ---------------------------------------------------------------------------
+# 4 & 5. generation module
+# ---------------------------------------------------------------------------
+
+
+def test_build_messages_includes_identity_language_and_no_ams():
+    generation = pytest.importorskip("app.services.generation", reason="generation service not yet available")
+    profile = make_profile()
+    application = make_application(language="de")
+    cvs = make_cvs()
+
+    system, user = generation.build_messages(
+        profile=profile,
+        application=application,
+        cvs=cvs,
+        language="de",
+        produce_letter=True,
+        produce_email=True,
+        extra="",
+    )
+    combined = (system or "") + "\n" + (user or "")
+
+    assert profile.name in combined
+    assert profile.employers[0]["name"] in combined
+    # target language mentioned somewhere
+    assert ("de" in combined.lower()) or ("german" in combined.lower()) or ("deutsch" in combined.lower())
+    # The user-facing prompt (job-specific content) must never reference AMS.
+    # The system prompt may instruct the model NOT to mention AMS, so we only
+    # forbid it appearing as genuine application content in the user prompt.
+    assert "AMS" not in (user or "")
+
+
+def _required_types():
+    return {
+        "motivation_letter": str,
+        "email_subject": str,
+        "email_body": str,
+        "recommended_cv_label": str,
+        "recommended_cv_reason": str,
+        "extracted": dict,
+    }
+
+
+def test_generate_fills_all_keys_and_validates_cv_label():
+    generation = pytest.importorskip("app.services.generation", reason="generation service not yet available")
+    profile = make_profile()
+    application = make_application(language="de")
+    cvs = make_cvs()
+
+    # AI returns a partial dict missing several keys, and a bogus cv label.
+    ai = FakeAI(json_result={
+        "motivation_letter": "Sehr geehrte Damen und Herren ...",
+        "recommended_cv_label": "Nonexistent Variant",
+    })
+
+    result = generation.generate(
+        ai,
+        profile=profile,
+        application=application,
+        cvs=cvs,
+        language="de",
+        produce_letter=True,
+        produce_email=True,
+    )
+
+    assert isinstance(result, dict)
+    for key, typ in _required_types().items():
+        assert key in result, f"missing key {key}"
+        assert isinstance(result[key], typ), f"{key} should be {typ}, got {type(result[key])}"
+
+    labels = {c.label for c in cvs}
+    assert result["recommended_cv_label"] == "" or result["recommended_cv_label"] in labels
+
+
+def test_generate_raises_generation_error_when_ai_fails():
+    generation = pytest.importorskip("app.services.generation", reason="generation service not yet available")
+    assert hasattr(generation, "GenerationError")
+    profile = make_profile()
+    application = make_application(language="de")
+    cvs = make_cvs()
+
+    ai = FakeAI(raise_exc=RuntimeError("ai boom"))
+
+    with pytest.raises(generation.GenerationError):
+        generation.generate(
+            ai,
+            profile=profile,
+            application=application,
+            cvs=cvs,
+            language="de",
+            produce_letter=True,
+            produce_email=True,
+        )
+
+
+# ---------------------------------------------------------------------------
+# 6. intake module
+# ---------------------------------------------------------------------------
+
+
+def test_normalize_collapses_blank_lines_and_strips():
+    intake = pytest.importorskip("app.services.intake", reason="intake service not yet available")
+    raw = "  first line\n\n\n\n\nsecond line  "
+    out = intake.normalize(raw)
+    assert "\n\n\n" not in out          # 3+ blank lines collapsed to at most 2 newlines
+    assert out == out.strip()           # leading/trailing whitespace stripped
+    assert "first line" in out
+    assert "second line" in out
+
+
+def test_intake_paste_mode_strips():
+    intake = pytest.importorskip("app.services.intake", reason="intake service not yet available")
+    assert intake.intake(mode="paste", text="  hi  ") == "hi"
+
+
+def test_intake_bogus_mode_raises():
+    intake = pytest.importorskip("app.services.intake", reason="intake service not yet available")
+    assert hasattr(intake, "IntakeError")
+    with pytest.raises(intake.IntakeError):
+        intake.intake(mode="bogus", text="whatever")

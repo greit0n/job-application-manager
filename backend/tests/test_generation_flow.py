@@ -57,7 +57,6 @@ def _fill_profile(client):
             "address": "Hafinger Weg 8/3, 3100 St. Pölten",
             "phone": "+43 681 20858721",
             "email": "georgi@example.com",
-            "employers": [{"name": "Fezle", "role": "Founder", "start": "2023", "end": "", "highlights": ["SaaS"]}],
         },
     )
     assert resp.status_code == 200, resp.text
@@ -158,3 +157,18 @@ def test_generate_requires_profile_for_letter(client, ai_client):
     )
     assert resp.status_code == 422
     assert "profile" in resp.json()["detail"].lower()
+
+
+def test_generate_requires_a_cv_with_text(client, ai_client):
+    login(client)
+    _fill_profile(client)  # name + address present, but NO CV uploaded
+    app_id = client.post(
+        "/api/applications/intake",
+        data={"mode": "paste", "text": "Senior Engineer at Acme", "language": "de"},
+    ).json()["id"]
+    resp = client.post(
+        f"/api/applications/{app_id}/generate",
+        json={"language": "de", "produce_letter": True, "produce_email": False},
+    )
+    assert resp.status_code == 422
+    assert "cv" in resp.json()["detail"].lower()

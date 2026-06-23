@@ -40,7 +40,8 @@ class Settings(BaseSettings):
     ai_backend: str = "claude_code"
     claude_bin: str = "claude"  # path to the claude executable on the server
     claude_code_oauth_token: str = ""  # from `claude setup-token` (env on the server)
-    claude_model: str = ""  # empty = CLI default; e.g. "opus" to force
+    claude_model: str = ""  # empty = CLI default; e.g. "claude-opus-4-8" or "opus"
+    claude_effort: str = ""  # CLI --effort: low|medium|high|xhigh|max ("" = default)
     claude_timeout: int = 180  # seconds per generation
     anthropic_api_key: str = ""  # only for the anthropic_api backend
 

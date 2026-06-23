@@ -96,10 +96,12 @@ def make_cvs():
         types.SimpleNamespace(
             id=10, label="Fullstack", language="de",
             notes="Fuer breite Rollen", filename="cv_fullstack.pdf", is_default=True,
+            extracted_text="Senior Developer at Litenweb GmbH since 2020.",
         ),
         types.SimpleNamespace(
             id=11, label="Leadership", language="de",
             notes="Fuer Fuehrungsrollen", filename="cv_leadership.pdf", is_default=False,
+            extracted_text="Tech Lead at Litenweb GmbH, 2022-2024.",
         ),
     ]
 
@@ -203,7 +205,8 @@ def test_build_messages_includes_identity_language_and_no_ams():
     combined = (system or "") + "\n" + (user or "")
 
     assert profile.name in combined
-    assert profile.employers[0]["name"] in combined
+    # CV extracted_text is the grounding source (employers block removed in Task 4).
+    assert cvs[0].extracted_text in combined
     # target language mentioned somewhere
     assert ("de" in combined.lower()) or ("german" in combined.lower()) or ("deutsch" in combined.lower())
     # The user-facing prompt (job-specific content) must never reference AMS.
@@ -387,3 +390,36 @@ def test_ensure_cv_text_noop_when_already_present():
     out = ensure_cv_text(cv, db=db, storage=storage, ai=_FakeAI())
     assert out == "already here"
     assert got["called"] is False  # storage never touched
+
+
+def test_build_messages_grounds_on_cv_text_not_employers():
+    from types import SimpleNamespace
+    from app.services.generation import build_messages
+
+    profile = SimpleNamespace(
+        name="Georgi", address="Wien", phone="+43", email="g@example.com",
+        languages="German native", availability="Immediate", preferences="Remote ok",
+    )
+    application = SimpleNamespace(
+        company="Acme", position="Engineer", job_text="We need Python.",
+        location="", salary="", url="",
+    )
+    cvs = [
+        SimpleNamespace(label="Fullstack", language="de", notes="hands-on",
+                        extracted_text="Worked at Fezle building SaaS in Python."),
+        SimpleNamespace(label="Leadership", language="de", notes="lead roles",
+                        extracted_text="Led a team of five at Fezle."),
+    ]
+    system, user = build_messages(
+        profile=profile, application=application, cvs=cvs, language="de",
+        produce_letter=True, produce_email=True,
+    )
+    # CV text is present for grounding...
+    assert "Worked at Fezle building SaaS in Python." in user
+    assert "Led a team of five at Fezle." in user
+    # ...and the recommendation labels are still there.
+    assert "Fullstack" in user and "Leadership" in user
+    # No employers section header anymore.
+    assert "EMPLOYERS" not in user.upper()
+    # Grounding rule references the CV as the source.
+    assert "CV" in system

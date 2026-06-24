@@ -2886,6 +2886,19 @@
     if (part === "body") copyToClipboard(packet.body, "Email body");
   }
 
+  async function redirectToGmailConnect() {
+    try {
+      const status = await api("/api/gmail/status");
+      if (!status.configured) {
+        toast("Gmail OAuth is not configured on the server yet.", "error");
+        return;
+      }
+      window.location.href = "/api/gmail/connect";
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  }
+
   async function createGmailDraft(id) {
     const app = getApp(id);
     if (!app) return;
@@ -2911,7 +2924,7 @@
       toast("Gmail draft created.", "success");
     } catch (e) {
       if (e.status === 409 && /connect gmail/i.test(e.message)) {
-        window.location.href = "/api/gmail/connect";
+        await redirectToGmailConnect();
         return;
       }
       toast(e.message, "error");

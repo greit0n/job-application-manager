@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Job Application Manager</title>
 <link rel="icon" type="image/png" href="assets/logo.png">
@@ -21,7 +21,6 @@
 </script>
 <style>
   :root {
-    /* Logo-derived brand: navy briefcase, teal check, rising teal arrow */
     --brand-navy: #0b1e40;
     --brand-blue: #1e5bbf;
     --brand-blue-bright: #2e74e6;
@@ -29,30 +28,26 @@
     --teal-bright: #16b8c4;
     --grad-brand: linear-gradient(135deg, #163a82 0%, #1e5bbf 48%, #16b8c4 100%);
 
-    /* Surfaces / text (light) */
-    --bg: #eaeef4;
+    --bg: #f4f6fa;
     --surface: #ffffff;
-    --surface-2: #f3f6fb;
+    --surface-2: #f7f9fc;
     --surface-3: #eef2f8;
     --text: #0c1a30;
     --muted: #5a6b82;
     --faint: #8694a8;
-    --line: #e1e7f0;
-    --line-strong: #ccd6e4;
+    --line: #e4e9f1;
+    --line-strong: #d2dae6;
 
-    /* Sidebar stays a deep navy in both themes (premium, app-like) */
     --rail: #0a1c3c;
     --rail-2: #0d2349;
     --rail-text: #c5d2e6;
     --rail-muted: #7e8fb0;
     --rail-line: rgba(255, 255, 255, 0.08);
 
-    /* Accent for interactive emphasis */
     --accent: #1e5bbf;
-    --accent-soft: #e6eefb;
-    --ring: rgba(30, 91, 191, 0.32);
+    --accent-soft: #e8eefb;
+    --ring: rgba(30, 91, 191, 0.28);
 
-    /* Status hues */
     --c-pending: #b07314;
     --c-applied: #2f6fb0;
     --c-interview: #0e98a4;
@@ -60,9 +55,9 @@
     --c-rejected: #c0493d;
     --c-filled: #6b7688;
 
-    --shadow-sm: 0 1px 2px rgba(12, 26, 48, 0.06), 0 1px 1px rgba(12, 26, 48, 0.04);
-    --shadow: 0 10px 30px rgba(12, 26, 48, 0.08);
-    --shadow-lg: 0 28px 70px rgba(8, 20, 40, 0.22);
+    --shadow-sm: 0 1px 2px rgba(12, 26, 48, 0.05);
+    --shadow: 0 4px 16px rgba(12, 26, 48, 0.06), 0 1px 3px rgba(12, 26, 48, 0.04);
+    --shadow-lg: 0 24px 60px rgba(8, 20, 40, 0.18), 0 4px 12px rgba(8, 20, 40, 0.08);
     --radius: 14px;
     --radius-sm: 10px;
     --radius-lg: 20px;
@@ -95,7 +90,7 @@
     --c-rejected: #e8786b;
     --c-filled: #8f9bb0;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.6);
   }
 
@@ -110,6 +105,7 @@
     font-family: var(--font);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   button, input, select, textarea { font: inherit; color: inherit; }
@@ -117,396 +113,175 @@
   a { color: var(--accent); text-underline-offset: 2px; }
   h1, h2, h3, h4, p { margin: 0; }
 
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--teal);
-  }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal); }
   .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
   .muted { color: var(--muted); }
 
-  /* ---------- App frame ---------- */
-  .app {
-    display: grid;
-    grid-template-columns: 256px minmax(0, 1fr);
-    min-height: 100vh;
-  }
+  .app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
 
   .sidebar {
-    position: sticky;
-    top: 0;
-    align-self: start;
-    height: 100vh;
+    position: sticky; top: 0; align-self: start; height: 100vh;
     background: linear-gradient(180deg, var(--rail) 0%, var(--rail-2) 100%);
-    color: var(--rail-text);
-    display: flex;
-    flex-direction: column;
-    padding: 22px 16px;
-    border-right: 1px solid var(--rail-line);
+    color: var(--rail-text); display: flex; flex-direction: column;
+    padding: 20px 14px; border-right: 1px solid var(--rail-line);
   }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 6px 8px 22px;
-  }
-  .brand img { width: 40px; height: 40px; display: block; }
-  .brand .name { font-size: 15px; font-weight: 750; color: #fff; line-height: 1.2; letter-spacing: -0.01em; }
+  .brand { display: flex; align-items: center; gap: 11px; padding: 4px 6px 22px; }
+  .brand img { width: 38px; height: 38px; display: block; }
+  .brand .name { font-size: 14.5px; font-weight: 750; color: #fff; line-height: 1.2; letter-spacing: -0.01em; }
   .brand .tag { font-size: 11px; color: var(--rail-muted); letter-spacing: 0.04em; }
 
-  .nav { display: flex; flex-direction: column; gap: 4px; }
+  .nav { display: flex; flex-direction: column; gap: 3px; }
   .nav button {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 11px 12px;
-    border-radius: var(--radius-sm);
-    color: var(--rail-text);
-    font-size: 14px;
-    font-weight: 550;
-    text-align: left;
-    position: relative;
-    transition: background 160ms ease, color 160ms ease;
+    display: flex; align-items: center; gap: 11px; width: 100%; padding: 10px 11px;
+    border-radius: 9px; color: var(--rail-text); font-size: 14px; font-weight: 550;
+    text-align: left; position: relative; transition: background 160ms ease, color 160ms ease;
   }
-  .nav button .icon { width: 19px; height: 19px; color: var(--rail-muted); transition: color 160ms ease; flex: 0 0 auto; }
-  .nav button:hover { background: rgba(255, 255, 255, 0.06); }
+  .nav button .icon { width: 18px; height: 18px; color: var(--rail-muted); transition: color 160ms ease; flex: 0 0 auto; }
+  .nav button:hover { background: rgba(255, 255, 255, 0.05); }
   .nav button:hover .icon { color: var(--rail-text); }
-  .nav button.active {
-    background: rgba(22, 184, 196, 0.14);
-    color: #fff;
-    box-shadow: inset 0 0 0 1px rgba(22, 184, 196, 0.25);
-  }
+  .nav button.active { background: rgba(22, 184, 196, 0.13); color: #fff; }
   .nav button.active .icon { color: var(--teal-bright); }
   .nav button.active::before {
-    content: "";
-    position: absolute;
-    left: -16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 22px;
-    border-radius: 0 3px 3px 0;
-    background: var(--teal-bright);
+    content: ""; position: absolute; left: -14px; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: var(--teal-bright);
   }
 
-  .rail-foot { margin-top: auto; padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
-  .rail-privacy {
-    border: 1px solid var(--rail-line);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.03);
-  }
-  .rail-privacy .row { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12.5px; font-weight: 650; }
-  .rail-privacy .row .icon { width: 15px; height: 15px; color: var(--teal-bright); }
-  .rail-privacy p { margin-top: 5px; font-size: 11.5px; color: var(--rail-muted); line-height: 1.45; }
+  .rail-foot { margin-top: auto; padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .rail-privacy { border: 1px solid var(--rail-line); border-radius: 9px; padding: 11px; background: rgba(255, 255, 255, 0.03); }
+  .rail-privacy .row { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12px; font-weight: 650; }
+  .rail-privacy .row .icon { width: 14px; height: 14px; color: var(--teal-bright); }
+  .rail-privacy p { margin-top: 5px; font-size: 11px; color: var(--rail-muted); line-height: 1.45; }
 
-  .rail-user {
-    display: flex; align-items: center; gap: 10px;
-    border: 1px solid var(--rail-line); border-radius: var(--radius-sm);
-    padding: 10px 12px; background: rgba(255, 255, 255, 0.03);
-  }
-  .rail-user .avatar {
-    width: 32px; height: 32px; flex: 0 0 auto; border-radius: 50%;
-    display: grid; place-items: center; font-weight: 700; font-size: 13px;
-    color: #fff; background: var(--grad-brand);
-  }
+  .rail-user { display: flex; align-items: center; gap: 10px; border: 1px solid var(--rail-line); border-radius: 9px; padding: 9px 11px; background: rgba(255, 255, 255, 0.03); }
+  .rail-user .avatar { width: 30px; height: 30px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 12px; color: #fff; background: var(--grad-brand); }
   .rail-user .who { min-width: 0; flex: 1; }
-  .rail-user .who .nm { color: #fff; font-size: 12.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rail-user .who .em { color: var(--rail-muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rail-user .logout {
-    flex: 0 0 auto; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center;
-    color: var(--rail-muted); border: 1px solid var(--rail-line);
-  }
+  .rail-user .who .nm { color: #fff; font-size: 12px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rail-user .who .em { color: var(--rail-muted); font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rail-user .logout { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; color: var(--rail-muted); border: 1px solid var(--rail-line); }
   .rail-user .logout:hover { color: #fff; border-color: var(--teal-bright); }
-  .rail-user .logout .icon { width: 16px; height: 16px; }
+  .rail-user .logout .icon { width: 15px; height: 15px; }
 
-  /* ---------- Main column ---------- */
   .main { min-width: 0; display: flex; flex-direction: column; }
-
   .appbar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 28px;
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
-    backdrop-filter: saturate(140%) blur(10px);
+    position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 14px;
+    padding: 14px 28px; background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: saturate(150%) blur(12px); -webkit-backdrop-filter: saturate(150%) blur(12px);
     border-bottom: 1px solid var(--line);
   }
   .appbar .titles { min-width: 0; flex: 1; }
-  .appbar h1 { font-size: 21px; font-weight: 760; letter-spacing: -0.02em; line-height: 1.15; }
+  .appbar h1 { font-size: 20px; font-weight: 740; letter-spacing: -0.02em; line-height: 1.15; }
   .appbar-brand { display: none; align-items: center; gap: 9px; }
-  .appbar-brand img { width: 30px; height: 30px; }
-  .appbar-actions { display: flex; align-items: center; gap: 10px; }
+  .appbar-brand img { width: 28px; height: 28px; }
+  .appbar-actions { display: flex; align-items: center; gap: 9px; }
+  main.content { padding: 24px 28px 100px; }
 
-  main.content { padding: 26px 28px 96px; }
-
-  /* ---------- Buttons ---------- */
   .btn {
-    min-height: 40px;
-    border-radius: var(--radius-sm);
-    padding: 0 15px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    background: var(--surface);
-    border: 1px solid var(--line-strong);
-    box-shadow: var(--shadow-sm);
-    white-space: nowrap;
-    transition: transform 120ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    min-height: 38px; border-radius: var(--radius-sm); padding: 0 15px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    font-size: 14px; font-weight: 600; color: var(--text); background: var(--surface);
+    border: 1px solid var(--line-strong); box-shadow: var(--shadow-sm); white-space: nowrap;
+    transition: transform 120ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, filter 140ms ease;
   }
   .btn:hover { border-color: var(--accent); }
   .btn:active { transform: translateY(1px); }
-  .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-  .btn.primary {
-    background: var(--grad-brand);
-    border-color: transparent;
-    color: #fff;
-    box-shadow: 0 6px 18px rgba(22, 95, 191, 0.32);
-  }
-  .btn.primary:hover { filter: brightness(1.05); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn.primary { background: var(--grad-brand); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(22, 95, 191, 0.28); }
+  .btn.primary:hover { filter: brightness(1.06); }
   .btn.ghost { background: transparent; box-shadow: none; border-color: var(--line); }
-  .btn.danger { color: var(--c-rejected); border-color: color-mix(in srgb, var(--c-rejected) 38%, var(--line)); background: color-mix(in srgb, var(--c-rejected) 8%, var(--surface)); box-shadow: none; }
-  .btn.danger:hover { border-color: var(--c-rejected); }
-  .btn.small { min-height: 33px; padding: 0 11px; font-size: 13px; }
-  .btn .icon { width: 17px; height: 17px; flex: 0 0 auto; }
+  .btn.ghost:hover { background: var(--surface-2); }
+  .btn.danger { color: var(--c-rejected); border-color: color-mix(in srgb, var(--c-rejected) 36%, var(--line)); background: color-mix(in srgb, var(--c-rejected) 6%, var(--surface)); box-shadow: none; }
+  .btn.danger:hover { border-color: var(--c-rejected); background: color-mix(in srgb, var(--c-rejected) 10%, var(--surface)); }
+  .btn.small { min-height: 32px; padding: 0 11px; font-size: 13px; border-radius: 8px; }
+  .btn .icon { width: 16px; height: 16px; flex: 0 0 auto; }
 
-  .icon-btn {
-    width: 40px; height: 40px;
-    border-radius: var(--radius-sm);
-    display: inline-grid;
-    place-items: center;
-    background: var(--surface);
-    border: 1px solid var(--line-strong);
-    box-shadow: var(--shadow-sm);
-    color: var(--muted);
-    transition: color 140ms ease, border-color 140ms ease;
-  }
+  .icon-btn { width: 38px; height: 38px; border-radius: var(--radius-sm); display: inline-grid; place-items: center; background: var(--surface); border: 1px solid var(--line-strong); box-shadow: var(--shadow-sm); color: var(--muted); transition: color 140ms ease, border-color 140ms ease; }
   .icon-btn:hover { color: var(--text); border-color: var(--accent); }
-  .icon-btn .icon { width: 19px; height: 19px; }
+  .icon-btn .icon { width: 18px; height: 18px; }
   .theme-toggle .moon { display: none; }
   html[data-theme="dark"] .theme-toggle .sun { display: none; }
   html[data-theme="dark"] .theme-toggle .moon { display: block; }
 
-  /* spinner */
-  .spinner {
-    width: 16px; height: 16px; flex: 0 0 auto;
-    border: 2px solid currentColor; border-right-color: transparent;
-    border-radius: 50%; display: inline-block; animation: spin 700ms linear infinite;
-  }
+  .spinner { width: 15px; height: 15px; flex: 0 0 auto; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; display: inline-block; animation: spin 700ms linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 1600ms; } }
 
-  /* ---------- Sections ---------- */
   .section { display: none; }
-  .section.active { display: block; animation: rise 280ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
-  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  @media (prefers-reduced-motion: reduce) {
-    .section.active { animation: none; }
-    html { scroll-behavior: auto; }
-  }
+  .section.active { display: block; animation: rise 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .section.active { animation: none; } html { scroll-behavior: auto; } }
 
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    min-width: 0;
-  }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); min-width: 0; }
   .panel-pad { padding: 18px 20px; }
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--line);
-  }
+  .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
   .panel-title { font-size: 16px; font-weight: 720; letter-spacing: -0.01em; }
   .panel-note { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
-  /* ---------- Hero / dashboard ---------- */
-  .hero {
-    position: relative;
-    overflow: hidden;
-    padding: 22px;
-    margin-bottom: 18px;
-  }
-  .hero::after {
-    /* faint rising-arrow motif echoing the logo */
-    content: "";
-    position: absolute;
-    right: -60px;
-    bottom: -80px;
-    width: 320px;
-    height: 320px;
-    background: radial-gradient(circle at 70% 70%, rgba(22, 184, 196, 0.12), transparent 60%);
-    pointer-events: none;
-  }
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    position: relative;
-    z-index: 1;
-  }
-  .stat {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 15px 16px;
-    background: var(--surface-2);
-    display: grid;
-    gap: 6px;
-  }
-  .stat .label { color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; }
-  .stat .value { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
-  .stat.accent { background: var(--grad-brand); border-color: transparent; }
-  .stat.accent .label { color: rgba(255, 255, 255, 0.8); }
-  .stat.accent .value { color: #fff; }
+  .command-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 20px 22px; margin-bottom: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .command-card .cc-text { min-width: 0; }
+  .command-card h2 { font-size: 17px; font-weight: 720; letter-spacing: -0.01em; }
+  .command-card p { color: var(--muted); font-size: 13px; margin-top: 3px; }
+  .command-card .btn { flex: 0 0 auto; }
 
-  /* Signature: pipeline trajectory (applications rising toward an offer) */
-  .pipeline-wrap { position: relative; z-index: 1; margin-top: 22px; }
-  .pipeline-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-  .pipeline {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    align-items: end;
-    height: 150px;
-    padding: 0 4px;
-  }
-  .stage {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-    /* each stage lifted higher than the previous for an ascending trajectory */
-    padding-bottom: calc(var(--i) * 20px);
-  }
-  .stage-bar {
-    width: 100%;
-    max-width: 92px;
-    height: var(--h, 30px);
-    border-radius: 9px 9px 4px 4px;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--sc) 78%, #fff 8%), var(--sc));
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 7px;
-    color: #fff;
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--sc) 34%, transparent);
-    transition: height 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-  .stage-count { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; }
-  .stage-label { font-size: 11.5px; font-weight: 600; color: var(--muted); text-align: center; }
-  .stage:nth-child(1) { --sc: var(--c-pending); }
-  .stage:nth-child(2) { --sc: var(--c-applied); }
-  .stage:nth-child(3) { --sc: var(--c-interview); }
-  .stage:nth-child(4) { --sc: var(--c-offer); }
-  .trajectory {
-    position: absolute;
-    left: 6%;
-    right: 4%;
-    bottom: 26px;
-    height: 86px;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.5;
-  }
-  .outcomes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; position: relative; z-index: 1; }
-  .outcome { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); font-size: 12.5px; font-weight: 600; }
-  .outcome b { font-family: var(--mono); }
-  .outcome .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .count-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .count { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 13px 15px; background: var(--surface); display: flex; flex-direction: column; gap: 3px; }
+  .count .label { color: var(--faint); font-size: 10.5px; font-weight: 650; letter-spacing: 0.1em; text-transform: uppercase; }
+  .count .value { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+  .count.accent .value { color: var(--c-offer); }
 
-  .board {
-    display: grid;
-    grid-template-columns: minmax(0, 1.65fr) minmax(0, 0.95fr);
-    gap: 18px;
-    align-items: start;
-  }
+  .board { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr); gap: 18px; align-items: start; }
 
-  /* ---------- Toolbar / search ---------- */
-  .toolbar {
-    display: grid;
-    grid-template-columns: minmax(180px, 1fr) auto auto;
-    gap: 10px;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--line);
-  }
+  .focus-list { display: grid; gap: 8px; }
+  .focus-item { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 13px 15px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); transition: border-color 140ms ease, background 140ms ease; }
+  .focus-item:hover { border-color: var(--line-strong); background: var(--surface-2); }
+  .focus-item .co { font-weight: 660; }
+  .focus-item .role { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .focus-action { display: grid; gap: 4px; min-width: 0; }
+  .focus-action .next { color: var(--text); font-weight: 700; font-size: 13.5px; }
+  .focus-action .meta { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .recent-list { display: grid; gap: 4px; }
+  .recent-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px; align-items: center; width: 100%; text-align: left; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid transparent; transition: background 140ms ease, border-color 140ms ease; }
+  .recent-row + .recent-row { margin-top: 2px; }
+  .recent-row:hover { background: var(--surface-2); border-color: var(--line); }
+  .recent-row:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
+  .recent-row .r-co { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .recent-row .r-role { color: var(--muted); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .recent-row .r-date { color: var(--faint); font-size: 12px; }
+
+  .toolbar { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
   .search { position: relative; }
-  .search input { padding-left: 40px; }
-  .search .icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--faint); width: 18px; height: 18px; pointer-events: none; }
+  .search input { padding-left: 38px; }
+  .search .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--faint); width: 17px; height: 17px; pointer-events: none; }
 
-  input, select, textarea {
-    width: 100%;
-    min-height: 42px;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-sm);
-    background-color: var(--surface);
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color 140ms ease, box-shadow 140ms ease;
-  }
+  input, select, textarea { width: 100%; min-height: 40px; border: 1px solid var(--line-strong); border-radius: 9px; background-color: var(--surface); padding: 9px 12px; outline: none; transition: border-color 140ms ease, box-shadow 140ms ease; }
   html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea { background-color: var(--surface-2); }
   textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
   input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
   input::placeholder, textarea::placeholder { color: var(--faint); }
-  select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a6b82' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+  select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a6b82' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
   html[data-theme="dark"] select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aabc4' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
 
-  /* ---------- Applications list (table to cards) ---------- */
   .apps { padding: 6px 8px 10px; }
-  .apps-head, .app-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.5fr) 120px 120px minmax(0, 1fr) 78px;
-    gap: 12px;
-    align-items: center;
-  }
-  .apps-head { padding: 10px 14px; }
-  .apps-head .col {
-    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--faint); text-align: left; display: inline-flex; align-items: center; gap: 5px;
-  }
+  .apps-head, .app-row { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.5fr) 120px 120px minmax(0, 1fr) 70px; gap: 12px; align-items: center; }
+  .apps-head { padding: 9px 14px; }
+  .apps-head .col { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); text-align: left; display: inline-flex; align-items: center; gap: 5px; }
   .apps-head button.col:hover { color: var(--text); }
   .apps-head .col[data-active="true"] { color: var(--accent); }
-  .apps-head .col .caret { width: 13px; height: 13px; opacity: 0; transition: opacity 140ms ease, transform 140ms ease; }
+  .apps-head .col .caret { width: 12px; height: 12px; opacity: 0; transition: opacity 140ms ease, transform 140ms ease; }
   .apps-head .col[data-active="true"] .caret { opacity: 1; }
   .apps-head .col[data-dir="desc"] .caret { transform: rotate(180deg); }
 
-  .app-row {
-    width: 100%;
-    text-align: left;
-    padding: 14px;
-    border-radius: var(--radius-sm);
-    border: 1px solid transparent;
-    transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
-  }
+  .app-row { width: 100%; text-align: left; padding: 13px 14px; border-radius: var(--radius-sm); border: 1px solid transparent; transition: background 140ms ease, border-color 140ms ease, transform 120ms ease; }
   .app-row + .app-row { margin-top: 2px; }
   .app-row:hover { background: var(--surface-2); border-color: var(--line); }
   .app-row:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
   .app-row .cell { min-width: 0; font-size: 14px; }
   .app-row .sub { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .app-row .co { font-weight: 680; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+  .app-row .co { font-weight: 660; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
   .app-row .c-date, .app-row .c-proofs { color: var(--muted); font-size: 13px; }
   .app-row .c-cv { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .status {
-    display: inline-flex; align-items: center; gap: 7px;
-    border-radius: 999px; padding: 4px 11px; font-size: 12px; font-weight: 650; white-space: nowrap;
-    color: var(--sc); background: color-mix(in srgb, var(--sc) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--sc) 26%, transparent);
-  }
+  .status { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 4px 11px; font-size: 12px; font-weight: 650; white-space: nowrap; color: var(--sc); background: color-mix(in srgb, var(--sc) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--sc) 24%, transparent); }
   .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .status.pending { --sc: var(--c-pending); }
   .status.applied { --sc: var(--c-applied); }
@@ -515,182 +290,68 @@
   .status.rejected { --sc: var(--c-rejected); }
   .status.filled { --sc: var(--c-filled); }
 
-  /* ---------- Needs attention ---------- */
-  .focus-list { display: grid; gap: 8px; }
-  .focus-item {
-    display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
-    padding: 13px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2);
-  }
-  .focus-item .co { font-weight: 650; }
-  .focus-item .role { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
-  .focus-action { display: grid; gap: 4px; min-width: 0; }
-  .focus-action .next { color: var(--text); font-weight: 720; font-size: 13.5px; }
-  .focus-action .meta { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-  /* ---------- Cards (applications grid) ---------- */
-  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-  .card {
-    border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
-    padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-sm);
-  }
-  .card .card-top { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
-  .card h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
-  .card .card-role { color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .card .card-notes { color: var(--muted); font-size: 13px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-  .card .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: auto; }
-  .card .card-foot .when { color: var(--faint); font-size: 12px; }
-
-  /* ---------- Empty states ---------- */
-  .empty { text-align: center; padding: 40px 22px; color: var(--muted); }
-  .empty .empty-icon {
-    width: 46px; height: 46px; margin: 0 auto 14px; color: var(--accent);
-    display: grid; place-items: center; border-radius: 14px;
-    background: var(--accent-soft); padding: 11px;
-  }
+  .empty { text-align: center; padding: 44px 22px; color: var(--muted); }
+  .empty .empty-icon { width: 44px; height: 44px; margin: 0 auto 14px; color: var(--accent); display: grid; place-items: center; border-radius: 13px; background: var(--accent-soft); padding: 10px; }
   .empty strong { display: block; color: var(--text); font-size: 16px; font-weight: 700; margin-bottom: 5px; }
   .empty span { display: block; max-width: 380px; margin: 0 auto; font-size: 13.5px; }
   .empty-action { margin-top: 16px; }
 
-  /* ---------- Forms / layout ---------- */
   .split { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 18px; align-items: start; }
-  .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
   .form-grid .full { grid-column: 1 / -1; }
   .field { display: grid; gap: 6px; }
   .field label { font-size: 13px; font-weight: 650; }
   .field .helper { color: var(--muted); font-size: 12px; }
-  .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
 
-  input[type="file"] { padding: 9px 11px; cursor: pointer; }
-  input[type="file"]::file-selector-button { margin-right: 12px; border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--text); padding: 7px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+  input[type="file"] { padding: 8px 11px; cursor: pointer; }
+  input[type="file"]::file-selector-button { margin-right: 12px; border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--text); padding: 6px 12px; border-radius: 7px; font-weight: 600; cursor: pointer; }
 
   .file-list { display: grid; gap: 10px; }
-  .file-row {
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;
-    border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 13px 14px; background: var(--surface-2);
-  }
+  .file-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; background: var(--surface); }
   .file-name { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
   .file-meta { color: var(--muted); font-size: 12px; margin-top: 3px; }
-  .file-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .file-actions { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
 
   .tag { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-strong); border-radius: 999px; padding: 3px 10px; color: var(--muted); font-size: 11.5px; font-weight: 600; background: var(--surface); }
   .tag.default { color: var(--teal); border-color: color-mix(in srgb, var(--teal) 40%, transparent); background: color-mix(in srgb, var(--teal) 10%, var(--surface)); }
 
-  .notice {
-    border: 1px solid var(--line); border-left: 3px solid var(--teal);
-    border-radius: var(--radius-sm); background: var(--surface-2); padding: 14px; color: var(--muted); font-size: 13px;
-  }
+  .notice { border: 1px solid var(--line); border-left: 3px solid var(--teal); border-radius: var(--radius-sm); background: var(--surface-2); padding: 13px 14px; color: var(--muted); font-size: 13px; }
   .notice.warn { border-left-color: var(--c-pending); }
 
-  /* ---------- Tabs (intake) ---------- */
   .tabs { display: flex; gap: 4px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 4px; background: var(--surface-2); margin-bottom: 16px; }
-  .tabs button { flex: 1; min-height: 36px; border-radius: 7px; font-size: 13.5px; font-weight: 600; color: var(--muted); transition: background 140ms ease, color 140ms ease; }
+  .tabs button { flex: 1; min-height: 34px; border-radius: 7px; font-size: 13.5px; font-weight: 600; color: var(--muted); transition: background 140ms ease, color 140ms ease; }
   .tabs button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  .ck-row { display: flex; align-items: center; gap: 9px; padding: 9px 0; }
+  .ck-row { display: flex; align-items: center; gap: 9px; padding: 8px 0; }
   .ck-row input[type="checkbox"] { width: 18px; height: 18px; min-height: 0; flex: 0 0 auto; accent-color: var(--accent); }
   .ck-row label { font-size: 14px; font-weight: 600; }
-  .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; }
-  .seg button { padding: 0 16px; min-height: 40px; font-size: 13.5px; font-weight: 600; color: var(--muted); }
-  .seg button.active { background: var(--accent-soft); color: var(--accent); }
 
-  /* ---------- Intake wizard ---------- */
-  .wizard-stepper {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 18px;
-  }
-  .wizard-step {
-    min-width: 0;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--surface-2);
-    padding: 10px 11px;
-  }
-  .wizard-step .num {
-    display: inline-grid;
-    place-items: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 999px;
-    background: var(--surface);
-    border: 1px solid var(--line-strong);
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 7px;
-  }
-  .wizard-step strong {
-    display: block;
-    font-size: 12.5px;
-    line-height: 1.25;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  .wizard-stepper { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 18px; }
+  .wizard-step { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); padding: 10px 11px; }
+  .wizard-step .num { display: inline-grid; place-items: center; width: 21px; height: 21px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line-strong); color: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 700; margin-bottom: 6px; }
+  .wizard-step strong { display: block; font-size: 12.5px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .wizard-step span { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
-  .wizard-step.active {
-    background: var(--accent-soft);
-    border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
-  }
+  .wizard-step.active { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 36%, var(--line)); }
   .wizard-step.active .num { background: var(--accent); border-color: var(--accent); color: #fff; }
   .wizard-step.done .num { background: var(--teal); border-color: var(--teal); color: #fff; }
-  .wizard-body { min-height: 410px; }
+  .wizard-body { min-height: 400px; }
   .wizard-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr); gap: 18px; align-items: start; }
-  .wizard-aside {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    background: var(--surface-2);
-    display: grid;
-    gap: 10px;
-  }
+  .wizard-aside { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 14px; background: var(--surface-2); display: grid; gap: 10px; }
   .wizard-aside h3 { font-size: 13px; font-weight: 720; }
   .wizard-aside p, .wizard-aside li { color: var(--muted); font-size: 12.5px; }
   .wizard-aside ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
   .choice-list { display: grid; gap: 10px; }
-  .choice-row {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 11px;
-    align-items: start;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    background: var(--surface-2);
-  }
+  .choice-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 11px; align-items: start; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px; background: var(--surface-2); }
   .choice-row input { width: 18px; height: 18px; min-height: 0; margin-top: 2px; accent-color: var(--accent); }
   .choice-row strong { display: block; font-size: 13.5px; }
   .choice-row span { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
-  .packet-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .packet-preview {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--surface-2);
-    padding: 13px;
-    display: grid;
-    gap: 10px;
-  }
-  .packet-preview h5 {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin: 0;
-  }
-  .packet-preview pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 13.5px;
-    line-height: 1.45;
-  }
+  .packet-actions { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+  .packet-preview { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); padding: 13px; display: grid; gap: 10px; }
+  .packet-preview h5 { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin: 0; }
+  .packet-preview pre { margin: 0; white-space: pre-wrap; word-break: break-word; color: var(--text); font-family: var(--font); font-size: 13.5px; line-height: 1.45; }
   .packet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .packet-grid .wide { grid-column: 1 / -1; }
   .mini-summary { display: grid; gap: 8px; }
@@ -699,61 +360,47 @@
   .mini-summary span { color: var(--muted); font-size: 12px; }
   .mini-summary b { font-size: 12.5px; text-align: right; }
 
-  /* ---------- Drawer ---------- */
+  .gmail-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+  .gmail-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: 0 0 auto; }
+  .gmail-chip.connected { color: var(--c-offer); border-color: color-mix(in srgb, var(--c-offer) 30%, var(--line)); background: color-mix(in srgb, var(--c-offer) 8%, var(--surface)); }
+  .gmail-chip.warn { color: var(--c-pending); border-color: color-mix(in srgb, var(--c-pending) 30%, var(--line)); background: color-mix(in srgb, var(--c-pending) 8%, var(--surface)); }
+  .gmail-chip button { color: inherit; font: inherit; font-weight: 650; text-decoration: underline; text-underline-offset: 2px; }
+
   .drawer { position: fixed; inset: 0; display: none; z-index: 40; }
   .drawer.open { display: block; }
-  .drawer-backdrop { position: absolute; inset: 0; background: rgba(6, 15, 31, 0.5); backdrop-filter: blur(2px); }
-  .drawer-panel {
-    position: absolute; top: 0; right: 0; width: min(760px, 100%); height: 100%;
-    background: var(--surface); box-shadow: var(--shadow-lg); padding: 24px; overflow-y: auto;
-    animation: slideIn 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  }
-  @keyframes slideIn { from { transform: translateX(28px); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
+  .drawer-backdrop { position: absolute; inset: 0; background: rgba(6, 15, 31, 0.45); backdrop-filter: blur(2px); }
+  .drawer-panel { position: absolute; top: 0; right: 0; width: min(760px, 100%); height: 100%; background: var(--surface); box-shadow: var(--shadow-lg); padding: 22px; overflow-y: auto; animation: slideIn 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  @keyframes slideIn { from { transform: translateX(24px); opacity: 0.5; } to { transform: translateX(0); opacity: 1; } }
   .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .detail-card { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-2); padding: 13px; }
   .detail-card h4 { font-size: 11px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-bottom: 5px; }
   .detail-card p { font-size: 14px; word-break: break-word; }
-  .detail-block { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 15px; margin-top: 14px; }
+  .detail-block { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 15px; margin-top: 14px; background: var(--surface); }
   .detail-block h4 { font-size: 13px; font-weight: 700; margin-bottom: 9px; }
-  .detail-block-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 10px; }
+  .detail-block-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
   .detail-block-head h4 { margin-bottom: 2px; }
   .reco { border: 1px solid color-mix(in srgb, var(--teal) 34%, var(--line)); border-left: 3px solid var(--teal); background: color-mix(in srgb, var(--teal) 7%, var(--surface)); border-radius: var(--radius-sm); padding: 13px 15px; margin-top: 14px; }
   .reco h4 { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
 
-  /* ---------- Modal ---------- */
   .modal { position: fixed; inset: 0; z-index: 50; display: none; place-items: center; padding: 20px; }
   .modal.open { display: grid; animation: fade 180ms ease both; }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-  .modal-backdrop { position: absolute; inset: 0; background: rgba(6, 15, 31, 0.55); backdrop-filter: blur(3px); }
-  .modal-panel {
-    position: relative; width: min(840px, 100%); max-height: calc(100vh - 40px); overflow-y: auto;
-    background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 1px solid var(--line); padding: 24px;
-    animation: pop 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  }
-  @keyframes pop { from { transform: scale(0.97) translateY(8px); opacity: 0.6; } to { transform: scale(1) translateY(0); opacity: 1; } }
-  .close-row { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 20px; }
+  .modal-backdrop { position: absolute; inset: 0; background: rgba(6, 15, 31, 0.5); backdrop-filter: blur(3px); }
+  .modal-panel { position: relative; width: min(840px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border: 1px solid var(--line); padding: 22px; animation: pop 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  @keyframes pop { from { transform: scale(0.98) translateY(6px); opacity: 0.6; } to { transform: scale(1) translateY(0); opacity: 1; } }
+  .close-row { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 18px; }
   .close-row h2 { font-size: 19px; font-weight: 730; letter-spacing: -0.02em; }
   .hidden { display: none !important; }
 
-  /* ---------- Toasts ---------- */
   .toasts { position: fixed; right: 18px; bottom: 18px; z-index: 80; display: flex; flex-direction: column; gap: 10px; max-width: min(380px, calc(100vw - 36px)); }
-  .toast {
-    border: 1px solid var(--line); border-left: 3px solid var(--accent);
-    background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg);
-    border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13.5px; line-height: 1.4;
-    animation: pop 200ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  }
+  .toast { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13.5px; line-height: 1.4; animation: pop 200ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   .toast.error { border-left-color: var(--c-rejected); }
   .toast.success { border-left-color: var(--c-offer); }
 
-  /* ---------- Auth (login gate) ---------- */
   .auth-screen { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--bg); }
-  .auth-card {
-    width: min(420px, 100%); background: var(--surface); border: 1px solid var(--line);
-    border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 30px 28px;
-  }
+  .auth-card { width: min(420px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 30px 28px; }
   .auth-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
-  .auth-brand img { width: 44px; height: 44px; }
+  .auth-brand img { width: 42px; height: 42px; }
   .auth-brand .name { font-size: 17px; font-weight: 760; letter-spacing: -0.01em; }
   .auth-brand .tag { font-size: 12px; color: var(--muted); }
   .auth-card h1 { font-size: 20px; font-weight: 740; letter-spacing: -0.02em; margin-bottom: 4px; }
@@ -761,41 +408,28 @@
   .auth-fields { display: grid; gap: 14px; }
   .auth-err { color: var(--c-rejected); font-size: 13px; font-weight: 600; min-height: 18px; }
 
-  /* ---------- Responsive ---------- */
   @media (max-width: 1080px) {
-    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .count-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .board { grid-template-columns: 1fr; }
     .wizard-layout { grid-template-columns: 1fr; }
   }
-
   @media (max-width: 860px) {
     .app { grid-template-columns: 1fr; }
-    .sidebar {
-      position: fixed; bottom: 0; left: 0; right: 0; top: auto; height: auto;
-      flex-direction: row; padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-      border-right: 0; border-top: 1px solid var(--rail-line); z-index: 30;
-    }
+    .sidebar { position: fixed; bottom: 0; left: 0; right: 0; top: auto; height: auto; flex-direction: row; padding: 7px 8px calc(7px + env(safe-area-inset-bottom)); border-right: 0; border-top: 1px solid var(--rail-line); z-index: 30; }
     .brand, .rail-foot { display: none; }
     .nav { flex-direction: row; flex: 1; gap: 2px; justify-content: space-around; }
-    .nav button { flex-direction: column; gap: 3px; padding: 7px 6px; font-size: 10.5px; font-weight: 600; border-radius: 10px; }
+    .nav button { flex-direction: column; gap: 3px; padding: 6px 6px; font-size: 10px; font-weight: 600; border-radius: 9px; }
     .nav button.active::before { display: none; }
-    .nav button .icon { width: 21px; height: 21px; }
+    .nav button .icon { width: 20px; height: 20px; }
     .appbar { padding: 12px 16px; }
     .appbar-brand { display: flex; }
-    .appbar h1 { font-size: 18px; }
-    main.content { padding: 18px 16px 110px; }
+    .appbar h1 { font-size: 17px; }
+    main.content { padding: 16px 16px 110px; }
     .split { grid-template-columns: 1fr; }
-
-    /* Applications: table grid to stacked cards */
+    .command-card { flex-direction: column; align-items: stretch; gap: 14px; }
+    .command-card .btn { width: 100%; }
     .apps-head { display: none; }
-    .app-row {
-      grid-template-columns: 1fr auto;
-      gap: 6px 12px;
-      border: 1px solid var(--line);
-      background: var(--surface);
-      padding: 15px;
-      box-shadow: var(--shadow-sm);
-    }
+    .app-row { grid-template-columns: 1fr auto; gap: 6px 12px; border: 1px solid var(--line); background: var(--surface); padding: 14px; box-shadow: var(--shadow-sm); }
     .app-row + .app-row { margin-top: 10px; }
     .app-row:hover { transform: translateY(-1px); }
     .app-row .c-company { grid-column: 1; grid-row: 1; }
@@ -803,27 +437,23 @@
     .app-row .c-role { grid-column: 1 / -1; grid-row: 2; padding-top: 4px; border-top: 1px solid var(--line); margin-top: 4px; }
     .app-row .cell[data-label] { display: flex; align-items: baseline; gap: 8px; }
     .app-row .c-date, .app-row .c-cv, .app-row .c-proofs { grid-row: auto; }
-    .app-row .cell[data-label]::before {
-      content: attr(data-label) ":"; font-size: 11px; font-weight: 650; letter-spacing: 0.04em;
-      text-transform: uppercase; color: var(--faint); flex: 0 0 auto;
-    }
+    .app-row .cell[data-label]::before { content: attr(data-label) ":"; font-size: 11px; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); flex: 0 0 auto; }
     .app-row .c-status::before { content: none; }
     .app-row .c-role::before { content: none; }
   }
-
   @media (max-width: 520px) {
-    .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .count-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
     .form-grid { grid-template-columns: 1fr; }
     .detail-grid { grid-template-columns: 1fr; }
     .packet-grid { grid-template-columns: 1fr; }
     .wizard-stepper { grid-template-columns: 1fr 1fr; }
     .toolbar { grid-template-columns: 1fr; }
-    .pipeline { height: 130px; }
+    .modal-panel { padding: 18px; }
+    .drawer-panel { padding: 16px; }
   }
 </style>
 </head>
 <body>
-
 <!-- ===================== LOGIN GATE ===================== -->
 <div id="authScreen" class="auth-screen hidden">
   <div class="auth-card">
@@ -866,7 +496,7 @@
     <nav class="nav" aria-label="Main sections">
       <button type="button" data-tab="tracker" class="active">
         <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-        Dashboard
+        Today
       </button>
       <button type="button" data-tab="applications">
         <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7h18v13H3V7Zm5 0V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M3 12h18" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -908,8 +538,8 @@
         <img src="assets/logo.png" alt="">
       </div>
       <div class="titles">
-        <div class="eyebrow" id="pageEyebrow">Dashboard</div>
-        <h1 id="pageTitle">Pipeline overview</h1>
+        <div class="eyebrow" id="pageEyebrow">Today</div>
+        <h1 id="pageTitle">Your application cockpit</h1>
       </div>
       <div class="appbar-actions">
         <button class="icon-btn theme-toggle" type="button" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme">
@@ -925,55 +555,36 @@
 
     <main class="content">
       <section id="tracker" class="section active">
-        <div class="panel hero">
-          <div id="stats" class="stats"></div>
-          <div class="pipeline-wrap">
-            <div class="pipeline-head">
-              <div>
-                <div class="eyebrow">Trajectory</div>
-                <div class="panel-title">Where your search stands</div>
-              </div>
-              <span class="panel-note">From first lead to signed offer</span>
-            </div>
-            <div class="pipeline" id="pipeline"></div>
-            <div class="outcomes" id="outcomes"></div>
+        <div class="command-card">
+          <div class="cc-text">
+            <h2>Apply to your next role</h2>
+            <p>Drop a posting, generate a packet, review it, and send - in a few guided steps.</p>
           </div>
+          <button class="btn primary" type="button" data-action="new-application">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            Apply to job
+          </button>
         </div>
-
+        <div id="countStrip" class="count-strip"></div>
         <div class="board">
           <div class="panel">
-            <div class="toolbar">
-              <div class="search">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m21 21-4.2-4.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input id="searchInput" type="search" placeholder="Search company, role, notes, source">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Needs attention</div>
+                <p class="panel-note">Your next best moves, ordered by follow-up and deadline.</p>
               </div>
-              <select id="statusFilter" aria-label="Filter by status"></select>
-              <select id="sortSelect" aria-label="Sort applications">
-                <option value="date-desc">Newest first</option>
-                <option value="date-asc">Oldest first</option>
-                <option value="company-asc">Company A to Z</option>
-                <option value="status-asc">Status</option>
-              </select>
             </div>
-            <div class="apps">
-              <div class="apps-head" id="appsHead" role="row">
-                <button class="col" type="button" data-sort="company">Company <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <button class="col" type="button" data-sort="position">Role <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <button class="col" type="button" data-sort="status">Status <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <button class="col" type="button" data-sort="created">Date <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <div class="col">CV</div>
-                <div class="col">Docs</div>
-              </div>
-              <div id="applicationRows"></div>
-            </div>
+            <div id="focusList" class="focus-list panel-pad"></div>
           </div>
-
-          <aside class="panel panel-pad">
-            <div class="eyebrow">Next moves</div>
-            <div class="panel-title" style="margin-bottom:4px;">Needs attention</div>
-            <p class="panel-note" style="margin-bottom:14px;">Action-based queue from packet state, follow-up dates, and management fields.</p>
-            <div id="focusList" class="focus-list"></div>
-          </aside>
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Recent activity</div>
+                <p class="panel-note">Latest applications. Open one to manage it.</p>
+              </div>
+            </div>
+            <div id="recentList" class="recent-list panel-pad"></div>
+          </div>
         </div>
       </section>
 
@@ -989,7 +600,30 @@
               Apply to job
             </button>
           </div>
-          <div class="panel-pad" id="applicationCards"></div>
+          <div class="toolbar">
+            <div class="search">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m21 21-4.2-4.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input id="searchInput" type="search" placeholder="Search company, role, notes, source">
+            </div>
+            <select id="statusFilter" aria-label="Filter by status"></select>
+            <select id="sortSelect" aria-label="Sort applications">
+              <option value="date-desc">Newest first</option>
+              <option value="date-asc">Oldest first</option>
+              <option value="company-asc">Company A to Z</option>
+              <option value="status-asc">Status</option>
+            </select>
+          </div>
+          <div class="apps">
+            <div class="apps-head" id="appsHead" role="row">
+              <button class="col" type="button" data-sort="company">Company <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="col" type="button" data-sort="position">Role <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="col" type="button" data-sort="status">Status <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button class="col" type="button" data-sort="created">Date <svg class="caret" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 15 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <div class="col">CV</div>
+              <div class="col">Docs</div>
+            </div>
+            <div id="applicationRows"></div>
+          </div>
         </div>
       </section>
 
@@ -1086,7 +720,6 @@
                 <textarea id="profilePreferences" name="preferences" placeholder="Tone, salary range, remote policy, topics to avoid, relocation limits"></textarea>
               </div>
             </div>
-
             <div class="form-actions">
               <button class="btn primary" type="submit" id="profileSubmit">Save profile</button>
             </div>
@@ -1119,7 +752,6 @@
     <form id="intakeForm" autocomplete="off">
       <div id="intakeStepper" class="wizard-stepper" aria-label="Application packet steps"></div>
       <div id="intakeWizardBody" class="wizard-body"></div>
-
       <div class="form-actions">
         <button class="btn ghost" type="button" data-action="intake-back" id="intakeBack">Back</button>
         <button class="btn ghost" type="button" data-action="close-intake">Cancel</button>
@@ -1141,22 +773,10 @@
     </div>
     <form id="requiredProfileForm" autocomplete="off">
       <div class="form-grid">
-        <div class="field full">
-          <label for="reqName">Name</label>
-          <input id="reqName" name="name" required>
-        </div>
-        <div class="field full">
-          <label for="reqAddress">Address</label>
-          <input id="reqAddress" name="address" required placeholder="Street, postal code, city, country">
-        </div>
-        <div class="field">
-          <label for="reqPhone">Phone</label>
-          <input id="reqPhone" name="phone" required>
-        </div>
-        <div class="field">
-          <label for="reqEmail">Email</label>
-          <input id="reqEmail" name="email" type="email" required>
-        </div>
+        <div class="field full"><label for="reqName">Name</label><input id="reqName" name="name" required></div>
+        <div class="field full"><label for="reqAddress">Address</label><input id="reqAddress" name="address" required placeholder="Street, postal code, city, country"></div>
+        <div class="field"><label for="reqPhone">Phone</label><input id="reqPhone" name="phone" required></div>
+        <div class="field"><label for="reqEmail">Email</label><input id="reqEmail" name="email" type="email" required></div>
       </div>
       <div class="notice warn" style="margin-top:16px;">You can fill in the rest of your profile and upload your CVs later - your experience is read from the CVs you upload.</div>
       <div class="form-actions">
@@ -1170,6 +790,7 @@
 <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 
 <script>
+
 (() => {
   "use strict";
 
@@ -1186,7 +807,7 @@
   const STATUS_KEYS = statuses.map((s) => s.key);
 
   const pageMeta = {
-    tracker: { eyebrow: "Dashboard", title: "Pipeline overview" },
+    tracker: { eyebrow: "Today", title: "Your application cockpit" },
     applications: { eyebrow: "Manage", title: "All applications" },
     cvs: { eyebrow: "Documents", title: "CV variants" },
     profile: { eyebrow: "About you", title: "Candidate profile" },
@@ -1211,11 +832,11 @@
   const MGMT_START = "[[job-manager-management]]";
   const MGMT_END = "[[/job-manager-management]]";
 
-  /* ---------- App data (server-backed; no localStorage data) ---------- */
   let user = null;
   let profile = null;
   let cvs = [];
   let applications = [];
+  let gmailStatus = null;
   let currentTab = "tracker";
   let searchTerm = "";
   let statusFilter = "all";
@@ -1237,15 +858,13 @@
     userName: document.getElementById("userName"),
     userEmail: document.getElementById("userEmail"),
     nav: document.querySelector(".nav"),
-    stats: document.getElementById("stats"),
-    pipeline: document.getElementById("pipeline"),
-    outcomes: document.getElementById("outcomes"),
+    countStrip: document.getElementById("countStrip"),
+    recentList: document.getElementById("recentList"),
     statusFilter: document.getElementById("statusFilter"),
     sortSelect: document.getElementById("sortSelect"),
     searchInput: document.getElementById("searchInput"),
     appsHead: document.getElementById("appsHead"),
     applicationRows: document.getElementById("applicationRows"),
-    applicationCards: document.getElementById("applicationCards"),
     focusList: document.getElementById("focusList"),
     cvList: document.getElementById("cvList"),
     profileForm: document.getElementById("profileForm"),
@@ -1269,7 +888,6 @@
     toasts: document.getElementById("toasts"),
   };
 
-  /* ---------- Theme (the ONLY thing kept in localStorage) ---------- */
   function applyTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
   }
@@ -1280,7 +898,6 @@
     applyTheme(next);
   }
 
-  /* ---------- Utilities ---------- */
   function escapeHtml(value) {
     return String(value ?? "")
       .replaceAll("&", "&amp;")
@@ -1330,24 +947,11 @@
 
   function initialIntakeData() {
     return {
-      mode: "paste",
-      text: "",
-      url: "",
-      file: null,
-      language: "de",
-      company: "",
-      position: "",
-      source: "",
-      location: "",
-      salary: "",
-      deadline: "",
-      application_channel: "email",
-      recipient_name: "",
-      recipient_email: "",
-      produce_letter: true,
-      produce_email: true,
-      cv_id: "",
-      extra_instructions: "",
+      mode: "paste", text: "", url: "", file: null, language: "de",
+      company: "", position: "", source: "", location: "", salary: "",
+      deadline: "", application_channel: "email", recipient_name: "",
+      recipient_email: "", produce_letter: true, produce_email: true,
+      cv_id: "", extra_instructions: "",
     };
   }
 
@@ -1379,7 +983,6 @@
     const start = raw.indexOf(MGMT_START);
     const end = raw.indexOf(MGMT_END);
     if (start === -1 || end === -1 || end < start) return defaults;
-
     const block = raw.slice(start + MGMT_START.length, end).trim();
     const visible = (raw.slice(0, start) + raw.slice(end + MGMT_END.length)).trim();
     const parsed = { ...defaults, notes: visible };
@@ -1403,14 +1006,7 @@
     const hasMgmt = Object.values(fields).some(Boolean);
     const cleanNotes = String(notes || "").trim();
     if (!hasMgmt) return cleanNotes;
-    const block = [
-      MGMT_START,
-      `next_action: ${fields.next_action}`,
-      `follow_up: ${fields.follow_up}`,
-      `contact: ${fields.contact}`,
-      `channel: ${fields.channel}`,
-      MGMT_END,
-    ].join("\n");
+    const block = [MGMT_START, `next_action: ${fields.next_action}`, `follow_up: ${fields.follow_up}`, `contact: ${fields.contact}`, `channel: ${fields.channel}`, MGMT_END].join("\n");
     return [block, cleanNotes].filter(Boolean).join("\n\n");
   }
 
@@ -1436,9 +1032,7 @@
     };
   }
 
-  function visibleNotes(app) {
-    return managementForApp(app).notes;
-  }
+  function visibleNotes(app) { return managementForApp(app).notes; }
 
   function defaultNextAction(app) {
     const mgmt = managementForApp(app);
@@ -1475,7 +1069,6 @@
     };
   }
 
-  /* ---------- Toasts ---------- */
   function toast(message, kind = "") {
     const el = document.createElement("div");
     el.className = "toast" + (kind ? " " + kind : "");
@@ -1488,7 +1081,6 @@
     }, kind === "error" ? 6000 : 3500);
   }
 
-  /* ---------- Fetch helper (credentials + JSON/multipart + 401 + errors) ---------- */
   class ApiError extends Error {
     constructor(message, status) { super(message); this.status = status; }
   }
@@ -1499,16 +1091,12 @@
       opts.headers["Content-Type"] = "application/json";
       opts.body = JSON.stringify(json);
     } else if (form !== undefined) {
-      opts.body = form; // FormData: browser sets multipart boundary
+      opts.body = form;
     }
     let res;
-    try {
-      res = await fetch(path, opts);
-    } catch (e) {
-      throw new ApiError("Network error. Check your connection.", 0);
-    }
+    try { res = await fetch(path, opts); }
+    catch (e) { throw new ApiError("Network error. Check your connection.", 0); }
     if (res.status === 401) {
-      // Global 401 handler: bounce to login (unless this IS the login call).
       if (path !== "/api/auth/login") showLogin();
       throw new ApiError("Not authenticated.", 401);
     }
@@ -1526,7 +1114,6 @@
     return ct.includes("application/json") ? res.json() : res.text();
   }
 
-  /* ---------- Auth flow ---------- */
   function showLogin() {
     user = null;
     refs.appRoot.classList.add("hidden");
@@ -1543,11 +1130,23 @@
     refs.appRoot.classList.remove("hidden");
   }
 
+  function handleGmailRedirectParam() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("gmail") === "connected") {
+      toast("Gmail connected.", "success");
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      loadGmailStatus();
+    }
+  }
+
   async function bootSession() {
     try {
       const me = await api("/api/auth/me");
       user = me;
       await afterLogin();
+      handleGmailRedirectParam();
     } catch (e) {
       if (e.status === 401) showLogin();
       else { showLogin(); toast(e.message, "error"); }
@@ -1566,6 +1165,7 @@
       });
       refs.loginForm.reset();
       await afterLogin();
+      handleGmailRedirectParam();
     } catch (e) {
       refs.loginError.textContent = e.status === 401 ? "Wrong email or password." : e.message;
     } finally {
@@ -1581,7 +1181,7 @@
   async function afterLogin() {
     showApp();
     renderUser();
-    await Promise.all([loadProfile(), loadCvs(), loadApplications()]);
+    await Promise.all([loadProfile(), loadCvs(), loadApplications(), loadGmailStatus()]);
     renderAll();
     maybeForceProfile();
   }
@@ -1593,19 +1193,36 @@
     refs.userAvatar.textContent = initials(user.display_name || user.email);
   }
 
-  /* ---------- Loaders ---------- */
-  async function loadProfile() {
-    profile = await api("/api/profile");
-  }
+  async function loadProfile() { profile = await api("/api/profile"); }
   async function loadCvs() { cvs = await api("/api/cvs") || []; }
   async function loadApplications() { applications = await api("/api/applications") || []; }
+  async function loadGmailStatus() {
+    try { gmailStatus = await api("/api/gmail/status"); }
+    catch { gmailStatus = null; }
+  }
   async function reloadApplication(id) {
     const fresh = await api(`/api/applications/${id}`);
     applications = applications.map((a) => (String(a.id) === String(id) ? fresh : a));
     return fresh;
   }
 
-  /* ---------- Required-profile gate ---------- */
+  function gmailChipHtml() {
+    if (!gmailStatus || !gmailStatus.configured) {
+      return '<span class="gmail-chip warn"><span class="dot"></span>Gmail not configured on server</span>';
+    }
+    if (!gmailStatus.connected) {
+      return '<span class="gmail-chip warn"><span class="dot"></span><button type="button" data-action="gmail-connect">Connect Gmail</button></span>';
+    }
+    const email = gmailStatus.email ? escapeHtml(gmailStatus.email) : "Connected";
+    return `<span class="gmail-chip connected"><span class="dot"></span>${email}</span>`;
+  }
+
+  function gmailStatusText() {
+    if (!gmailStatus || !gmailStatus.configured) return "Not configured";
+    if (!gmailStatus.connected) return "Not connected";
+    return "Connected";
+  }
+
   function profileIncomplete() {
     if (!profile) return true;
     return !(profile.name && profile.address && profile.phone && profile.email);
@@ -1646,17 +1263,12 @@
     }
   }
 
-  /* ---------- Helper: build full profile PUT payload ---------- */
   function currentProfilePayload(overrides = {}) {
     const base = profile || {};
     return {
-      name: base.name || "",
-      address: base.address || "",
-      phone: base.phone || "",
-      email: base.email || "",
-      languages: base.languages || "",
-      availability: base.availability || "",
-      preferences: base.preferences || "",
+      name: base.name || "", address: base.address || "", phone: base.phone || "",
+      email: base.email || "", languages: base.languages || "",
+      availability: base.availability || "", preferences: base.preferences || "",
       ...overrides,
     };
   }
@@ -1665,20 +1277,18 @@
     renderProfileForm();
   }
 
-  /* ---------- Loading state helper ---------- */
   function setLoading(btn, loading, labelWhenDone) {
     if (!btn) return;
     if (loading) {
       if (!btn.dataset.label) btn.dataset.label = btn.textContent;
       btn.disabled = true;
-      btn.innerHTML = `<span class="spinner"></span><span>${escapeHtml(labelWhenDone || "Working...")}</span>`;
+      btn.innerHTML = '<span class="spinner"></span><span>' + escapeHtml(labelWhenDone || "Working...") + '</span>';
     } else {
       btn.disabled = false;
       btn.textContent = labelWhenDone || btn.dataset.label || "Done";
     }
   }
 
-  /* ---------- Counts / filtering ---------- */
   function getCounts() {
     const counts = Object.fromEntries(STATUS_KEYS.map((k) => [k, 0]));
     for (const app of applications) counts[app.status] = (counts[app.status] || 0) + 1;
@@ -1691,15 +1301,7 @@
   }
 
   function emptyState({ title, hint, action = "" }) {
-    return `
-      <div class="empty">
-        <div class="empty-icon">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width:100%;height:100%"><path d="M5 7h14v12H5V7Zm4 0V5h6v2" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </div>
-        <strong>${escapeHtml(title)}</strong>
-        <span>${escapeHtml(hint)}</span>
-        ${action ? `<div class="empty-action">${action}</div>` : ""}
-      </div>`;
+    return '<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width:100%;height:100%"><path d="M5 7h14v12H5V7Zm4 0V5h6v2" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div><strong>' + escapeHtml(title) + '</strong><span>' + escapeHtml(hint) + '</span>' + (action ? '<div class="empty-action">' + action + '</div>' : '') + '</div>';
   }
 
   function appDate(app) { return app.created_at || ""; }
@@ -1726,13 +1328,11 @@
     return apps;
   }
 
-  /* ---------- Render ---------- */
   function renderAll() {
     renderStatusControls();
-    renderStats();
+    renderCountStrip();
     renderTable();
-    renderCards();
-    renderOverview();
+    renderToday();
     renderCvs();
     renderProfileForm();
     updateSortHead();
@@ -1745,25 +1345,24 @@
   }
 
   function renderStatusControls() {
-    refs.statusFilter.innerHTML = [
-      `<option value="all">All statuses</option>`,
-      ...statuses.map((s) => `<option value="${s.key}">${escapeHtml(s.label)}</option>`),
-    ].join("");
+    refs.statusFilter.innerHTML = ['<option value="all">All statuses</option>'].concat(
+      statuses.map((s) => '<option value="' + s.key + '">' + escapeHtml(s.label) + '</option>')
+    ).join("");
     refs.statusFilter.value = statusFilter;
   }
 
-  function renderStats() {
+  function renderCountStrip() {
     const c = getCounts();
     const active = c.pending + c.applied + c.interview + c.offer;
-    refs.stats.innerHTML = [
-      statHtml("Total", c.total, false),
-      statHtml("Active", active, false),
-      statHtml("Interviews", c.interview, false),
-      statHtml("Offers", c.offer, true),
+    refs.countStrip.innerHTML = [
+      countHtml("Total", c.total, false),
+      countHtml("Active", active, false),
+      countHtml("Interviews", c.interview, false),
+      countHtml("Offers", c.offer, true),
     ].join("");
   }
-  function statHtml(label, value, accent) {
-    return `<div class="stat${accent ? " accent" : ""}"><div class="label">${escapeHtml(label)}</div><div class="value">${value}</div></div>`;
+  function countHtml(label, value, accent) {
+    return '<div class="count' + (accent ? " accent" : "") + '"><div class="label">' + escapeHtml(label) + '</div><div class="value">' + value + '</div></div>';
   }
 
   function renderTable() {
@@ -1772,31 +1371,21 @@
       const isFiltered = Boolean(searchTerm.trim()) || statusFilter !== "all";
       refs.applicationRows.innerHTML = emptyState({
         title: isFiltered ? "No matching applications" : "No applications yet",
-        hint: isFiltered
-          ? "Try a different search, or clear the status filter to see everything."
-          : "Drop your first job posting to start tracking your search.",
-        action: isFiltered
-          ? `<button class="btn" type="button" data-action="clear-filters">Clear filters</button>`
-          : `<button class="btn primary" type="button" data-action="new-application">Apply to job</button>`,
+        hint: isFiltered ? "Try a different search, or clear the status filter to see everything." : "Drop your first job posting to start tracking your search.",
+        action: isFiltered ? '<button class="btn" type="button" data-action="clear-filters">Clear filters</button>' : '<button class="btn primary" type="button" data-action="new-application">Apply to job</button>',
       });
       return;
     }
-    refs.applicationRows.innerHTML = apps.map((app) => `
-      <button class="app-row" type="button" data-id="${escapeHtml(app.id)}">
-        <span class="cell c-company">
-          <span class="co">${escapeHtml(app.company || "Untitled")}</span>
-          <span class="sub">${escapeHtml(app.location || "Location not set")}</span>
-        </span>
-        <span class="cell c-role">
-          <span class="co">${escapeHtml(app.position || "Role not set")}</span>
-          <span class="sub">${escapeHtml(app.source || "Source not set")}</span>
-        </span>
-        <span class="cell c-status" data-label="Status"><span class="status ${app.status}">${escapeHtml(statusLabel(app.status))}</span></span>
-        <span class="cell c-date mono" data-label="Date">${escapeHtml(formatDate(appDate(app)))}</span>
-        <span class="cell c-cv" data-label="CV">${escapeHtml(cvLabelById(app.selected_cv_id))}</span>
-        <span class="cell c-proofs mono" data-label="Docs">${(app.documents || []).length}</span>
-      </button>
-    `).join("");
+    refs.applicationRows.innerHTML = apps.map((app) => 
+      '<button class="app-row" type="button" data-id="' + escapeHtml(app.id) + '">' +
+        '<span class="cell c-company"><span class="co">' + escapeHtml(app.company || "Untitled") + '</span><span class="sub">' + escapeHtml(app.location || "Location not set") + '</span></span>' +
+        '<span class="cell c-role"><span class="co">' + escapeHtml(app.position || "Role not set") + '</span><span class="sub">' + escapeHtml(app.source || "Source not set") + '</span></span>' +
+        '<span class="cell c-status" data-label="Status"><span class="status ' + app.status + '">' + escapeHtml(statusLabel(app.status)) + '</span></span>' +
+        '<span class="cell c-date mono" data-label="Date">' + escapeHtml(formatDate(appDate(app))) + '</span>' +
+        '<span class="cell c-cv" data-label="CV">' + escapeHtml(cvLabelById(app.selected_cv_id)) + '</span>' +
+        '<span class="cell c-proofs mono" data-label="Docs">' + (app.documents || []).length + '</span>' +
+      '</button>'
+    ).join("");
   }
 
   function updateSortHead() {
@@ -1809,59 +1398,7 @@
     });
   }
 
-  function renderCards() {
-    if (!applications.length) {
-      refs.applicationCards.innerHTML = emptyState({
-        title: "No applications yet",
-        hint: "Add your first application to build out your tracker.",
-        action: `<button class="btn primary" type="button" data-action="new-application">Apply to job</button>`,
-      });
-      return;
-    }
-    const cards = [...applications]
-      .sort((a, b) => String(appDate(b)).localeCompare(String(appDate(a))))
-      .map((app) => `
-        <article class="card">
-          <div class="card-top">
-            <div>
-              <h3>${escapeHtml(app.company || "Untitled")}</h3>
-              <div class="card-role">${escapeHtml(app.position || "Role not set")}</div>
-            </div>
-            <span class="status ${app.status}">${escapeHtml(statusLabel(app.status))}</span>
-          </div>
-          <p class="card-notes">${escapeHtml(visibleNotes(app) || defaultNextAction(app) || "No notes yet.")}</p>
-          <div class="card-foot">
-            <span class="when">${escapeHtml(formatDate(appDate(app)))}</span>
-            <button class="btn small" type="button" data-open="${escapeHtml(app.id)}">Open details</button>
-          </div>
-        </article>
-      `).join("");
-    refs.applicationCards.innerHTML = `<div class="cards">${cards}</div>`;
-  }
-
-  function renderOverview() {
-    const counts = getCounts();
-    const funnel = ["pending", "applied", "interview", "offer"];
-    const max = Math.max(1, ...funnel.map((k) => counts[k] || 0));
-    refs.pipeline.innerHTML = funnel.map((key, index) => {
-      const value = counts[key] || 0;
-      const height = 26 + Math.round((value / max) * 70);
-      return `
-        <div class="stage" style="--i:${index}">
-          <div class="stage-bar" style="height:${height}px"><span class="stage-count">${value}</span></div>
-          <div class="stage-label">${escapeHtml(statusLabel(key).split(" (")[0])}</div>
-        </div>`;
-    }).join("");
-
-    const outcomes = [
-      { key: "offer", label: "Offers" },
-      { key: "rejected", label: "Rejected" },
-      { key: "filled", label: "Filled" },
-    ];
-    refs.outcomes.innerHTML = outcomes.map((item) =>
-      `<span class="outcome"><span class="dot" style="background:${statusColor(item.key)}"></span>${escapeHtml(item.label)} <b>${counts[item.key] || 0}</b></span>`
-    ).join("");
-
+  function renderToday() {
     const focus = applications
       .map((app) => ({ app, action: defaultNextAction(app), meta: actionMeta(app) }))
       .filter((item) => item.action && !["rejected", "filled"].includes(item.app.status))
@@ -1874,43 +1411,40 @@
       })
       .slice(0, 6);
 
-    refs.focusList.innerHTML = focus.length ? focus.map(({ app, action, meta }) => `
-      <div class="focus-item">
-        <div class="focus-action">
-          <div class="next">${escapeHtml(action)}</div>
-          <div class="co">${escapeHtml(app.company || "Untitled")}</div>
-          <div class="role">${escapeHtml(app.position || "Role not set")} &middot; ${escapeHtml(statusLabel(app.status))}</div>
-          ${meta ? `<div class="meta">${escapeHtml(meta)}</div>` : ""}
-        </div>
-        <button class="btn small" type="button" data-open="${escapeHtml(app.id)}">Open</button>
-      </div>
-    `).join("") : emptyState({
-      title: "All caught up",
-      hint: "Applications with a concrete next action will show up here.",
-    });
+    refs.focusList.innerHTML = focus.length ? focus.map(({ app, action, meta }) =>
+      '<div class="focus-item"><div class="focus-action">' +
+        '<div class="next">' + escapeHtml(action) + '</div>' +
+        '<div class="co">' + escapeHtml(app.company || "Untitled") + '</div>' +
+        '<div class="role">' + escapeHtml(app.position || "Role not set") + ' &middot; ' + escapeHtml(statusLabel(app.status)) + '</div>' +
+        (meta ? '<div class="meta">' + escapeHtml(meta) + '</div>' : "") +
+      '</div><button class="btn small" type="button" data-open="' + escapeHtml(app.id) + '">Open</button></div>'
+    ).join("") : emptyState({ title: "All caught up", hint: "Applications with a concrete next action will show up here." });
+
+    const recent = [...applications].sort((a, b) => String(appDate(b)).localeCompare(String(appDate(a)))).slice(0, 6);
+    refs.recentList.innerHTML = recent.length ? recent.map((app) =>
+      '<button class="recent-row" type="button" data-open="' + escapeHtml(app.id) + '">' +
+        '<span><span class="r-co">' + escapeHtml(app.company || "Untitled") + '</span><span class="r-role">' + escapeHtml(app.position || "Role not set") + '</span></span>' +
+        '<span class="status ' + app.status + '">' + escapeHtml(statusLabel(app.status)) + '</span>' +
+        '<span class="r-date mono">' + escapeHtml(formatDate(appDate(app))) + '</span>' +
+      '</button>'
+    ).join("") : emptyState({ title: "Nothing here yet", hint: "Applications you add will appear here for quick access.", action: '<button class="btn primary" type="button" data-action="new-application">Apply to job</button>' });
   }
 
   function renderCvs() {
     if (!cvs.length) {
-      refs.cvList.innerHTML = emptyState({
-        title: "No CVs uploaded",
-        hint: "Add one or more CV files using the form on the left.",
-      });
+      refs.cvList.innerHTML = emptyState({ title: "No CVs uploaded", hint: "Add one or more CV files using the form on the left." });
       return;
     }
-    refs.cvList.innerHTML = cvs.map((cv) => `
-      <div class="file-row">
-        <div>
-          <div class="file-name">${escapeHtml(cv.label)} ${cv.is_default ? `<span class="tag default">Default</span>` : ""} <span class="tag">${escapeHtml((cv.language || "").toUpperCase())}</span></div>
-          <div class="file-meta">${escapeHtml(cv.filename || "")} &middot; ${formatBytes(cv.size)} &middot; ${escapeHtml(cv.notes || "No notes")}</div>
-        </div>
-        <div class="file-actions">
-          <button class="btn small" type="button" data-cv-view="${escapeHtml(cv.id)}">View</button>
-          ${cv.is_default ? "" : `<button class="btn small" type="button" data-cv-default="${escapeHtml(cv.id)}">Set default</button>`}
-          <button class="btn small danger" type="button" data-cv-delete="${escapeHtml(cv.id)}">Delete</button>
-        </div>
-      </div>
-    `).join("");
+    refs.cvList.innerHTML = cvs.map((cv) =>
+      '<div class="file-row"><div>' +
+        '<div class="file-name">' + escapeHtml(cv.label) + (cv.is_default ? ' <span class="tag default">Default</span>' : "") + ' <span class="tag">' + escapeHtml((cv.language || "").toUpperCase()) + '</span></div>' +
+        '<div class="file-meta">' + escapeHtml(cv.filename || "") + ' &middot; ' + formatBytes(cv.size) + ' &middot; ' + escapeHtml(cv.notes || "No notes") + '</div>' +
+      '</div><div class="file-actions">' +
+        '<button class="btn small" type="button" data-cv-view="' + escapeHtml(cv.id) + '">View</button>' +
+        (cv.is_default ? "" : '<button class="btn small" type="button" data-cv-default="' + escapeHtml(cv.id) + '">Set default</button>') +
+        '<button class="btn small danger" type="button" data-cv-delete="' + escapeHtml(cv.id) + '">Delete</button>' +
+      '</div></div>'
+    ).join("");
   }
 
   function setValue(id, value) {
@@ -1929,7 +1463,6 @@
     setValue("profilePreferences", p.preferences);
   }
 
-  /* ---------- Profile save ---------- */
   async function handleProfileSubmit(event) {
     event.preventDefault();
     const fd = new FormData(refs.profileForm);
@@ -1956,7 +1489,6 @@
     }
   }
 
-  /* ---------- CV upload / manage ---------- */
   async function handleCvSubmit(event) {
     event.preventDefault();
     const fd = new FormData(refs.cvForm);
@@ -2001,7 +1533,6 @@
     } catch (e) { toast(e.message, "error"); }
   }
 
-  /* ---------- Intake ---------- */
   function openIntake() {
     closeDrawer();
     refs.intakeForm.reset();
@@ -2053,7 +1584,6 @@
     const genEmail = document.getElementById("wizGenEmail");
     const genCv = document.getElementById("wizGenCv");
     const genExtra = document.getElementById("wizGenExtra");
-
     if (text) intakeData.text = text.value;
     if (url) intakeData.url = url.value;
     if (file?.files?.[0]) intakeData.file = file.files[0];
@@ -2075,18 +1605,9 @@
   }
 
   function validateDropStep() {
-    if (intakeData.mode === "paste" && !intakeData.text.trim()) {
-      toast("Paste the job posting text first.", "error");
-      return false;
-    }
-    if (intakeData.mode === "url" && !intakeData.url.trim()) {
-      toast("Enter a job posting URL first.", "error");
-      return false;
-    }
-    if (intakeData.mode === "upload" && !intakeData.file) {
-      toast("Choose a posting file first.", "error");
-      return false;
-    }
+    if (intakeData.mode === "paste" && !intakeData.text.trim()) { toast("Paste the job posting text first.", "error"); return false; }
+    if (intakeData.mode === "url" && !intakeData.url.trim()) { toast("Enter a job posting URL first.", "error"); return false; }
+    if (intakeData.mode === "upload" && !intakeData.file) { toast("Choose a posting file first.", "error"); return false; }
     return true;
   }
 
@@ -2097,206 +1618,104 @@
 
   function renderIntakeWizard() {
     const current = intakeSteps[intakeStepIndex];
-    refs.intakeStepper.innerHTML = intakeSteps.map((step, index) => `
-      <div class="wizard-step${index === intakeStepIndex ? " active" : ""}${index < intakeStepIndex ? " done" : ""}">
-        <span class="num">${index + 1}</span>
-        <strong>${escapeHtml(step.label)}</strong>
-        <span>${escapeHtml(step.hint)}</span>
-      </div>
-    `).join("");
-
+    refs.intakeStepper.innerHTML = intakeSteps.map((step, index) =>
+      '<div class="wizard-step' + (index === intakeStepIndex ? " active" : "") + (index < intakeStepIndex ? " done" : "") + '">' +
+        '<span class="num">' + (index + 1) + '</span>' +
+        '<strong>' + escapeHtml(step.label) + '</strong>' +
+        '<span>' + escapeHtml(step.hint) + '</span>' +
+      '</div>'
+    ).join("");
     const labels = ["Continue", intakeDraftApp ? "Save basics" : "Create draft", "Generate packet", "Open management"];
     refs.intakeBack.classList.toggle("hidden", intakeStepIndex === 0);
     refs.intakeSubmit.disabled = false;
     refs.intakeSubmit.textContent = labels[intakeStepIndex] || "Continue";
-
     if (current.key === "drop") refs.intakeWizardBody.innerHTML = renderIntakeDropStep();
     if (current.key === "basics") refs.intakeWizardBody.innerHTML = renderIntakeBasicsStep();
     if (current.key === "generate") refs.intakeWizardBody.innerHTML = renderIntakeGenerateStep();
     if (current.key === "review") refs.intakeWizardBody.innerHTML = renderIntakeReviewStep();
-
     if (current.key === "drop") setIntakeTab(intakeData.mode || "paste");
   }
 
   function renderIntakeDropStep() {
-    return `
-      <div class="wizard-layout">
-        <div>
-          <div class="tabs" role="tablist" aria-label="Intake method">
-            <button type="button" class="active" data-intake-tab="paste" role="tab" aria-selected="true">Paste text</button>
-            <button type="button" data-intake-tab="url" role="tab" aria-selected="false">Paste URL</button>
-            <button type="button" data-intake-tab="upload" role="tab" aria-selected="false">Upload posting</button>
-          </div>
-          <div class="tab-panel active" data-intake-panel="paste">
-            <div class="field">
-              <label for="intakeText">Job posting text</label>
-              <textarea id="intakeText" name="text" style="min-height:250px;" placeholder="Paste the full job posting here...">${escapeHtml(intakeData.text)}</textarea>
-            </div>
-          </div>
-          <div class="tab-panel" data-intake-panel="url">
-            <div class="field">
-              <label for="intakeUrl">Job posting URL</label>
-              <input id="intakeUrl" name="url" type="url" placeholder="https://..." value="${escapeHtml(intakeData.url)}">
-              <span class="helper">The backend fetches and reads the posting from this link.</span>
-            </div>
-          </div>
-          <div class="tab-panel" data-intake-panel="upload">
-            <div class="field">
-              <label for="intakeFile">Posting file (PDF or image)</label>
-              <input id="intakeFile" name="file" type="file" accept=".pdf,application/pdf,image/*">
-              <span class="helper">${intakeData.file ? `Selected: ${escapeHtml(intakeData.file.name)}` : "The original posting is stored with the application."}</span>
-            </div>
-          </div>
-        </div>
-        <aside class="wizard-aside">
-          <h3>What happens here</h3>
-          <ul>
-            <li>The posting is stored as the source for this application.</li>
-            <li>URL and file extraction happen on the backend.</li>
-            <li>You can still correct company and role on the next step.</li>
-          </ul>
-        </aside>
-      </div>
-    `;
+    return '<div class="wizard-layout"><div>' +
+      '<div class="tabs" role="tablist" aria-label="Intake method">' +
+        '<button type="button" class="active" data-intake-tab="paste" role="tab" aria-selected="true">Paste text</button>' +
+        '<button type="button" data-intake-tab="url" role="tab" aria-selected="false">Paste URL</button>' +
+        '<button type="button" data-intake-tab="upload" role="tab" aria-selected="false">Upload posting</button>' +
+      '</div>' +
+      '<div class="tab-panel active" data-intake-panel="paste"><div class="field"><label for="intakeText">Job posting text</label>' +
+        '<textarea id="intakeText" name="text" style="min-height:250px;" placeholder="Paste the full job posting here...">' + escapeHtml(intakeData.text) + '</textarea></div></div>' +
+      '<div class="tab-panel" data-intake-panel="url"><div class="field"><label for="intakeUrl">Job posting URL</label>' +
+        '<input id="intakeUrl" name="url" type="url" placeholder="https://..." value="' + escapeHtml(intakeData.url) + '"><span class="helper">The backend fetches and reads the posting from this link.</span></div></div>' +
+      '<div class="tab-panel" data-intake-panel="upload"><div class="field"><label for="intakeFile">Posting file (PDF or image)</label>' +
+        '<input id="intakeFile" name="file" type="file" accept=".pdf,application/pdf,image/*"><span class="helper">' + (intakeData.file ? "Selected: " + escapeHtml(intakeData.file.name) : "The original posting is stored with the application.") + '</span></div></div>' +
+    '</div><aside class="wizard-aside"><h3>What happens here</h3><ul>' +
+      '<li>The posting is stored as the source for this application.</li>' +
+      '<li>URL and file extraction happen on the backend.</li>' +
+      '<li>You can still correct company and role on the next step.</li>' +
+    '</ul></aside></div>';
   }
 
   function renderIntakeBasicsStep() {
     const sourceHint = intakeData.mode === "url" ? intakeData.url : intakeData.mode === "upload" && intakeData.file ? intakeData.file.name : "Pasted text";
-    return `
-      <div class="wizard-layout">
-        <div>
-          <div class="form-grid">
-            <div class="field">
-              <label for="intakeCompany">Company</label>
-              <input id="intakeCompany" value="${escapeHtml(intakeData.company)}" placeholder="Company name">
-            </div>
-            <div class="field">
-              <label for="intakePosition">Position</label>
-              <input id="intakePosition" value="${escapeHtml(intakeData.position)}" placeholder="Role title">
-            </div>
-            <div class="field">
-              <label for="intakeBasicLanguage">Packet language</label>
-              <select id="intakeBasicLanguage">
-                <option value="de"${intakeData.language === "de" ? " selected" : ""}>German (Deutsch)</option>
-                <option value="en"${intakeData.language === "en" ? " selected" : ""}>English</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="intakeSource">Source</label>
-              <input id="intakeSource" value="${escapeHtml(intakeData.source)}" placeholder="${escapeHtml(sourceHint)}">
-            </div>
-            <div class="field">
-              <label for="intakeLocation">Location</label>
-              <input id="intakeLocation" value="${escapeHtml(intakeData.location)}" placeholder="Vienna, remote, hybrid">
-            </div>
-            <div class="field">
-              <label for="intakeSalary">Salary</label>
-              <input id="intakeSalary" value="${escapeHtml(intakeData.salary)}" placeholder="Optional">
-            </div>
-            <div class="field">
-              <label for="intakeDeadline">Deadline</label>
-              <input id="intakeDeadline" type="date" value="${escapeHtml(dateInputValue(intakeData.deadline))}">
-            </div>
-            <div class="field">
-              <label for="intakeChannel">Application channel</label>
-              <select id="intakeChannel">
-                <option value="email"${intakeData.application_channel === "email" ? " selected" : ""}>Email</option>
-                <option value="portal"${intakeData.application_channel === "portal" ? " selected" : ""}>Company portal</option>
-                <option value="linkedin"${intakeData.application_channel === "linkedin" ? " selected" : ""}>LinkedIn</option>
-                <option value="other"${intakeData.application_channel === "other" ? " selected" : ""}>Other</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="intakeRecipientName">Recipient name</label>
-              <input id="intakeRecipientName" value="${escapeHtml(intakeData.recipient_name)}" placeholder="Recruiter or hiring team">
-            </div>
-            <div class="field">
-              <label for="intakeRecipientEmail">Recipient email</label>
-              <input id="intakeRecipientEmail" type="email" value="${escapeHtml(intakeData.recipient_email)}" placeholder="jobs@example.com">
-            </div>
-          </div>
-        </div>
-        <aside class="wizard-aside">
-          <h3>Confirm before AI</h3>
-          <p>These fields make the packet easier to review later. The AI can still backfill missing company, role, location, salary, and deadline during generation.</p>
-          <div class="mini-summary">
-            <div class="row"><span>Input</span><b>${escapeHtml(intakeData.mode)}</b></div>
-            <div class="row"><span>Language</span><b>${escapeHtml(intakeData.language.toUpperCase())}</b></div>
-          </div>
-        </aside>
-      </div>
-    `;
+    return '<div class="wizard-layout"><div><div class="form-grid">' +
+      fieldHtml("intakeCompany", "Company", escapeHtml(intakeData.company), "Company name") +
+      fieldHtml("intakePosition", "Position", escapeHtml(intakeData.position), "Role title") +
+      selectFieldHtml("intakeBasicLanguage", "Packet language", '<option value="de"' + (intakeData.language === "de" ? " selected" : "") + '>German (Deutsch)</option><option value="en"' + (intakeData.language === "en" ? " selected" : "") + '>English</option>') +
+      fieldHtml("intakeSource", "Source", escapeHtml(intakeData.source), escapeHtml(sourceHint)) +
+      fieldHtml("intakeLocation", "Location", escapeHtml(intakeData.location), "Vienna, remote, hybrid") +
+      fieldHtml("intakeSalary", "Salary", escapeHtml(intakeData.salary), "Optional") +
+      dateFieldHtml("intakeDeadline", "Deadline", dateInputValue(intakeData.deadline)) +
+      selectFieldHtml("intakeChannel", "Application channel", channelOptions(intakeData.application_channel)) +
+      fieldHtml("intakeRecipientName", "Recipient name", escapeHtml(intakeData.recipient_name), "Recruiter or hiring team") +
+      fieldHtml("intakeRecipientEmail", "Recipient email", escapeHtml(intakeData.recipient_email), "jobs@example.com", "email") +
+    '</div></div><aside class="wizard-aside"><h3>Confirm before AI</h3>' +
+      '<p>These fields make the packet easier to review later. The AI can still backfill missing company, role, location, salary, and deadline during generation.</p>' +
+      '<div class="mini-summary"><div class="row"><span>Input</span><b>' + escapeHtml(intakeData.mode) + '</b></div><div class="row"><span>Language</span><b>' + escapeHtml(intakeData.language.toUpperCase()) + '</b></div></div>' +
+    '</aside></div>';
+  }
+
+  function fieldHtml(id, label, value, placeholder, type) {
+    return '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '"' + (type ? ' type="' + type + '"' : "") + ' value="' + value + '" placeholder="' + placeholder + '"></div>';
+  }
+  function selectFieldHtml(id, label, optionsHtml) {
+    return '<div class="field"><label for="' + id + '">' + label + '</label><select id="' + id + '">' + optionsHtml + '</select></div>';
+  }
+  function dateFieldHtml(id, label, value) {
+    return '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '" type="date" value="' + escapeHtml(value) + '"></div>';
+  }
+  function channelOptions(current) {
+    return ["email", "portal", "linkedin", "other"].map((v) => '<option value="' + v + '"' + (current === v ? " selected" : "") + ">" + (v.charAt(0).toUpperCase() + v.slice(1).replace("email", "Email").replace("portal", "Company portal").replace("linkedin", "LinkedIn").replace("other", "Other")) + "</option>").join("");
   }
 
   function renderIntakeGenerateStep() {
-    return `
-      <div class="wizard-layout">
-        <div>
-          <div class="choice-list">
-            <label class="choice-row" for="wizGenLetter">
-              <input type="checkbox" id="wizGenLetter"${intakeData.produce_letter ? " checked" : ""}>
-              <span><strong>Motivationsschreiben</strong><span>Generate the cover letter PDF content grounded in the selected CV text.</span></span>
-            </label>
-            <label class="choice-row" for="wizGenEmail">
-              <input type="checkbox" id="wizGenEmail"${intakeData.produce_email ? " checked" : ""}>
-              <span><strong>Application email</strong><span>Generate a shorter email with subject and body.</span></span>
-            </label>
-          </div>
-          <div class="form-grid" style="margin-top:16px;">
-            <div class="field">
-              <label for="wizGenLang">Packet language</label>
-              <select id="wizGenLang">
-                <option value="de"${intakeData.language === "de" ? " selected" : ""}>German (Deutsch)</option>
-                <option value="en"${intakeData.language === "en" ? " selected" : ""}>English</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="wizGenCv">CV selection</label>
-              <select id="wizGenCv">${cvGenerationOptionsHtml(intakeData.cv_id)}</select>
-              <span class="helper">Default is Auto-pick best CV. Choose a variant only when you want to override the AI.</span>
-            </div>
-            <div class="field full">
-              <label for="wizGenExtra">Extra instructions</label>
-              <textarea id="wizGenExtra" placeholder="Tone, points to emphasise, anything to avoid...">${escapeHtml(intakeData.extra_instructions)}</textarea>
-            </div>
-          </div>
-        </div>
-        <aside class="wizard-aside">
-          <h3>CV grounding</h3>
-          ${cvs.length
-            ? `<p>${cvs.length} CV variant${cvs.length === 1 ? "" : "s"} available. Auto-pick lets the backend use the AI recommendation and then saves the chosen variant when it matches.</p>`
-            : `<div class="notice warn">Upload a readable CV before generating. The backend will reject generation without CV text.</div>`}
-          ${intakeDraftApp ? `<div class="mini-summary">
-            <div class="row"><span>Draft</span><b>${escapeHtml(intakeDraftApp.company || "Untitled")}</b></div>
-            <div class="row"><span>Status</span><b>${escapeHtml(statusLabel(intakeDraftApp.status))}</b></div>
-          </div>` : ""}
-        </aside>
-      </div>
-    `;
+    return '<div class="wizard-layout"><div>' +
+      '<div class="choice-list">' +
+        '<label class="choice-row" for="wizGenLetter"><input type="checkbox" id="wizGenLetter"' + (intakeData.produce_letter ? " checked" : "") + '><span><strong>Motivationsschreiben</strong><span>Generate the cover letter PDF content grounded in the selected CV text.</span></span></label>' +
+        '<label class="choice-row" for="wizGenEmail"><input type="checkbox" id="wizGenEmail"' + (intakeData.produce_email ? " checked" : "") + '><span><strong>Application email</strong><span>Generate a shorter email with subject and body.</span></span></label>' +
+      '</div>' +
+      '<div class="form-grid" style="margin-top:16px;">' +
+        selectFieldHtml("wizGenLang", "Packet language", '<option value="de"' + (intakeData.language === "de" ? " selected" : "") + '>German (Deutsch)</option><option value="en"' + (intakeData.language === "en" ? " selected" : "") + '>English</option>') +
+        '<div class="field"><label for="wizGenCv">CV selection</label><select id="wizGenCv">' + cvGenerationOptionsHtml(intakeData.cv_id) + '</select><span class="helper">Default is Auto-pick best CV. Choose a variant only when you want to override the AI.</span></div>' +
+        '<div class="field full"><label for="wizGenExtra">Extra instructions</label><textarea id="wizGenExtra" placeholder="Tone, points to emphasise, anything to avoid...">' + escapeHtml(intakeData.extra_instructions) + '</textarea></div>' +
+      '</div></div>' +
+      '<aside class="wizard-aside"><h3>CV grounding</h3>' +
+        (cvs.length ? '<p>' + cvs.length + ' CV variant' + (cvs.length === 1 ? "" : "s") + ' available. Auto-pick lets the backend use the AI recommendation and then saves the chosen variant when it matches.</p>' : '<div class="notice warn">Upload a readable CV before generating. The backend will reject generation without CV text.</div>') +
+        (intakeDraftApp ? '<div class="mini-summary"><div class="row"><span>Draft</span><b>' + escapeHtml(intakeDraftApp.company || "Untitled") + '</b></div><div class="row"><span>Status</span><b>' + escapeHtml(statusLabel(intakeDraftApp.status)) + '</b></div></div>' : "") +
+      '</aside></div>';
   }
 
   function renderIntakeReviewStep() {
     const app = intakeDraftApp;
-    if (!app) {
-      return `<div class="notice warn">Create a draft first, then generate the application packet.</div>`;
-    }
-    return `
-      <div class="wizard-layout">
-        <div>
-          ${renderPacketReview(app, { editable: false })}
-        </div>
-        <aside class="wizard-aside">
-          <h3>Ready to send</h3>
-          <div class="mini-summary">
-            <div class="row"><span>Company</span><b>${escapeHtml(app.company || "Untitled")}</b></div>
-            <div class="row"><span>Role</span><b>${escapeHtml(app.position || "Role not set")}</b></div>
-            <div class="row"><span>CV</span><b>${escapeHtml(cvLabelById(app.selected_cv_id))}</b></div>
-            <div class="row"><span>ZIP</span><b>${hasDocumentKind(app, "zip") ? "Ready" : "Build when needed"}</b></div>
-          </div>
-          <p>Use the packet actions to copy the email, open Gmail, download the bundle, or mark this application as applied.</p>
-        </aside>
-      </div>
-    `;
+    if (!app) return '<div class="notice warn">Create a draft first, then generate the application packet.</div>';
+    return '<div class="wizard-layout"><div>' + renderPacketReview(app, { editable: false }) + '</div>' +
+      '<aside class="wizard-aside"><h3>Ready to send</h3><div class="mini-summary">' +
+        '<div class="row"><span>Company</span><b>' + escapeHtml(app.company || "Untitled") + '</b></div>' +
+        '<div class="row"><span>Role</span><b>' + escapeHtml(app.position || "Role not set") + '</b></div>' +
+        '<div class="row"><span>CV</span><b>' + escapeHtml(cvLabelById(app.selected_cv_id)) + '</b></div>' +
+        '<div class="row"><span>ZIP</span><b>' + (hasDocumentKind(app, "zip") ? "Ready" : "Build when needed") + '</b></div>' +
+        '<div class="row"><span>Gmail</span><b>' + gmailStatusText() + '</b></div>' +
+      '</div><p>Use the packet actions to copy the email, open Gmail, download the bundle, or mark this application as applied.</p></aside></div>';
   }
 
   async function createOrUpdateIntakeDraft() {
@@ -2308,14 +1727,9 @@
     payload.append("language", intakeData.language || "de");
     payload.append("company", String(intakeData.company || "").trim());
     payload.append("position", String(intakeData.position || "").trim());
-    if (intakeData.mode === "paste") {
-      payload.append("text", String(intakeData.text || "").trim());
-    } else if (intakeData.mode === "url") {
-      payload.append("url", String(intakeData.url || "").trim());
-    } else {
-      payload.append("file", intakeData.file);
-    }
-
+    if (intakeData.mode === "paste") payload.append("text", String(intakeData.text || "").trim());
+    else if (intakeData.mode === "url") payload.append("url", String(intakeData.url || "").trim());
+    else payload.append("file", intakeData.file);
     try {
       let app = intakeDraftApp;
       if (!app) {
@@ -2350,22 +1764,13 @@
 
   async function generateIntakePacket() {
     if (!intakeDraftApp) return null;
-    if (!intakeData.produce_letter && !intakeData.produce_email) {
-      toast("Select at least one document to produce.", "error");
-      return null;
-    }
+    if (!intakeData.produce_letter && !intakeData.produce_email) { toast("Select at least one document to produce.", "error"); return null; }
     const btn = refs.intakeSubmit;
     setLoading(btn, true, "Generating... (up to 90s)");
     try {
       const updated = await api(`/api/applications/${intakeDraftApp.id}/generate`, {
         method: "POST",
-        json: {
-          language: intakeData.language || "de",
-          produce_letter: intakeData.produce_letter,
-          produce_email: intakeData.produce_email,
-          cv_id: intakeData.cv_id ? Number(intakeData.cv_id) : null,
-          extra_instructions: intakeData.extra_instructions || "",
-        },
+        json: { language: intakeData.language || "de", produce_letter: intakeData.produce_letter, produce_email: intakeData.produce_email, cv_id: intakeData.cv_id ? Number(intakeData.cv_id) : null, extra_instructions: intakeData.extra_instructions || "" },
       });
       intakeDraftApp = updated;
       applications = applications.map((item) => (String(item.id) === String(updated.id) ? updated : item));
@@ -2383,37 +1788,14 @@
   async function handleIntakeSubmit(event) {
     event.preventDefault();
     captureIntakeStep();
-
-    if (intakeSteps[intakeStepIndex].key === "drop") {
-      if (!validateDropStep()) return;
-      setIntakeStep(1);
-      return;
-    }
-
-    if (intakeSteps[intakeStepIndex].key === "basics") {
-      const app = await createOrUpdateIntakeDraft();
-      if (app) setIntakeStep(2);
-      return;
-    }
-
-    if (intakeSteps[intakeStepIndex].key === "generate") {
-      const app = await generateIntakePacket();
-      if (app) setIntakeStep(3);
-      return;
-    }
-
-    if (intakeDraftApp) {
-      closeIntake();
-      openApplication(intakeDraftApp.id);
-    }
+    if (intakeSteps[intakeStepIndex].key === "drop") { if (!validateDropStep()) return; setIntakeStep(1); return; }
+    if (intakeSteps[intakeStepIndex].key === "basics") { const app = await createOrUpdateIntakeDraft(); if (app) setIntakeStep(2); return; }
+    if (intakeSteps[intakeStepIndex].key === "generate") { const app = await generateIntakePacket(); if (app) setIntakeStep(3); return; }
+    if (intakeDraftApp) { closeIntake(); openApplication(intakeDraftApp.id); }
   }
 
-  function intakeBack() {
-    captureIntakeStep();
-    if (intakeStepIndex > 0) setIntakeStep(intakeStepIndex - 1);
-  }
+  function intakeBack() { captureIntakeStep(); if (intakeStepIndex > 0) setIntakeStep(intakeStepIndex - 1); }
 
-  /* ---------- Drawer ---------- */
   function getApp(id) { return applications.find((a) => String(a.id) === String(id)); }
 
   function openApplication(id) {
@@ -2434,29 +1816,29 @@
   }
 
   function detailCard(label, value, trusted = false) {
-    return `<div class="detail-card"><h4>${escapeHtml(label)}</h4><p>${trusted ? value : escapeHtml(value)}</p></div>`;
+    return '<div class="detail-card"><h4>' + escapeHtml(label) + '</h4><p>' + (trusted ? value : escapeHtml(value)) + '</p></div>';
   }
 
   function cvOptionsHtml(selectedId) {
-    const opts = [`<option value="">No CV</option>`];
+    const opts = ['<option value="">No CV</option>'];
     for (const cv of cvs) {
       const sel = String(cv.id) === String(selectedId) ? " selected" : "";
-      opts.push(`<option value="${escapeHtml(cv.id)}"${sel}>${escapeHtml(cv.label)}${cv.is_default ? " (default)" : ""}</option>`);
+      opts.push('<option value="' + escapeHtml(cv.id) + '"' + sel + '>' + escapeHtml(cv.label) + (cv.is_default ? " (default)" : "") + '</option>');
     }
     return opts.join("");
   }
 
   function cvGenerationOptionsHtml(selectedId = "") {
-    const opts = [`<option value=""${selectedId ? "" : " selected"}>Auto-pick best CV</option>`];
+    const opts = ['<option value=""' + (selectedId ? "" : " selected") + '>Auto-pick best CV</option>'];
     for (const cv of cvs) {
       const sel = String(cv.id) === String(selectedId) ? " selected" : "";
-      opts.push(`<option value="${escapeHtml(cv.id)}"${sel}>${escapeHtml(cv.label)}${cv.is_default ? " (default)" : ""}</option>`);
+      opts.push('<option value="' + escapeHtml(cv.id) + '"' + sel + '>' + escapeHtml(cv.label) + (cv.is_default ? " (default)" : "") + '</option>');
     }
     return opts.join("");
   }
 
   function statusOptionsHtml(current) {
-    return statuses.map((s) => `<option value="${s.key}"${s.key === current ? " selected" : ""}>${escapeHtml(s.label)}</option>`).join("");
+    return statuses.map((s) => '<option value="' + s.key + '"' + (s.key === current ? " selected" : "") + '>' + escapeHtml(s.label) + '</option>').join("");
   }
 
   function renderPacketReview(app, { editable = false } = {}) {
@@ -2465,233 +1847,104 @@
     const body = app.email_body || "";
     const letter = app.motivation_letter || "";
     const id = escapeHtml(app.id);
-    const actions = `
-      <div class="packet-actions">
-        <button class="btn small" type="button" data-copy-subject="${id}"${subject ? "" : " disabled"}>Copy subject</button>
-        <button class="btn small" type="button" data-copy-body="${id}"${body ? "" : " disabled"}>Copy body</button>
-        <button class="btn small" type="button" data-gmail-draft="${id}"${subject || body ? "" : " disabled"}>Create Gmail draft</button>
-        <button class="btn small" type="button" data-bundle="${id}">Download ZIP</button>
-        ${app.status === "applied" ? "" : `<button class="btn small primary" type="button" data-mark-applied="${id}">Mark applied</button>`}
-      </div>
-    `;
+    const actions = '<div class="packet-actions">' +
+      '<button class="btn small" type="button" data-copy-subject="' + id + '"' + (subject ? "" : " disabled") + '>Copy subject</button>' +
+      '<button class="btn small" type="button" data-copy-body="' + id + '"' + (body ? "" : " disabled") + '>Copy body</button>' +
+      '<button class="btn small" type="button" data-gmail-draft="' + id + '"' + (subject || body ? "" : " disabled") + '>Create Gmail draft</button>' +
+      '<button class="btn small" type="button" data-bundle="' + id + '">Download ZIP</button>' +
+      (app.status === "applied" ? "" : '<button class="btn small primary" type="button" data-mark-applied="' + id + '">Mark applied</button>') +
+    '</div><div style="margin-top:8px;">' + gmailChipHtml() + '</div>';
 
     if (!hasGenerated) {
-      return `
-        <div class="detail-block">
-          <div class="detail-block-head">
-            <div>
-              <h4>Packet review</h4>
-              <p class="panel-note">Generate the letter or email before reviewing the packet.</p>
-            </div>
-          </div>
-          <div class="notice warn">No generated packet yet. Use Generate packet first.</div>
-        </div>
-      `;
+      return '<div class="detail-block"><div class="detail-block-head"><div><h4>Packet review</h4><p class="panel-note">Generate the letter or email before reviewing the packet.</p></div></div><div class="notice warn">No generated packet yet. Use Generate packet first.</div></div>';
     }
 
-    const editableFields = editable ? `
-      <div class="field">
-        <label for="edLetter">Cover letter</label>
-        <textarea id="edLetter" style="min-height:220px;">${escapeHtml(letter)}</textarea>
-      </div>
-      <div style="height:12px;"></div>
-      <div class="field">
-        <label for="edSubject">Email subject</label>
-        <input id="edSubject" value="${escapeHtml(subject)}">
-      </div>
-      <div style="height:12px;"></div>
-      <div class="field">
-        <label for="edBody">Email body</label>
-        <textarea id="edBody" style="min-height:160px;">${escapeHtml(body)}</textarea>
-      </div>
-      <div class="form-actions">
-        <button class="btn" type="button" data-save-edits="${id}">Save edits</button>
-      </div>
-    ` : `
-      <div class="packet-grid">
-        <div class="packet-preview">
-          <h5>Email subject</h5>
-          <pre>${escapeHtml(subject || "No subject generated.")}</pre>
-        </div>
-        <div class="packet-preview">
-          <h5>Selected CV</h5>
-          <pre>${escapeHtml(cvLabelById(app.selected_cv_id))}</pre>
-        </div>
-        <div class="packet-preview wide">
-          <h5>Email body</h5>
-          <pre>${escapeHtml(body || "No email body generated.")}</pre>
-        </div>
-        <div class="packet-preview wide">
-          <h5>Cover letter</h5>
-          <pre>${escapeHtml(letter || "No cover letter generated.")}</pre>
-        </div>
-      </div>
-    `;
+    const editableFields = editable ?
+      '<div class="field"><label for="edLetter">Cover letter</label><textarea id="edLetter" style="min-height:220px;">' + escapeHtml(letter) + '</textarea></div><div style="height:12px;"></div>' +
+      '<div class="field"><label for="edSubject">Email subject</label><input id="edSubject" value="' + escapeHtml(subject) + '"></div><div style="height:12px;"></div>' +
+      '<div class="field"><label for="edBody">Email body</label><textarea id="edBody" style="min-height:160px;">' + escapeHtml(body) + '</textarea></div>' +
+      '<div class="form-actions"><button class="btn" type="button" data-save-edits="' + id + '">Save edits</button></div>'
+    :
+      '<div class="packet-grid">' +
+        '<div class="packet-preview"><h5>Email subject</h5><pre>' + escapeHtml(subject || "No subject generated.") + '</pre></div>' +
+        '<div class="packet-preview"><h5>Selected CV</h5><pre>' + escapeHtml(cvLabelById(app.selected_cv_id)) + '</pre></div>' +
+        '<div class="packet-preview wide"><h5>Email body</h5><pre>' + escapeHtml(body || "No email body generated.") + '</pre></div>' +
+        '<div class="packet-preview wide"><h5>Cover letter</h5><pre>' + escapeHtml(letter || "No cover letter generated.") + '</pre></div>' +
+      '</div>';
 
-    return `
-      <div class="detail-block">
-        <div class="detail-block-head">
-          <div>
-            <h4>Packet review</h4>
-            <p class="panel-note">Copy the email, create a Gmail draft, build the ZIP, or mark the application as sent.</p>
-          </div>
-          ${actions}
-        </div>
-        ${editableFields}
-      </div>
-    `;
+    return '<div class="detail-block"><div class="detail-block-head"><div><h4>Packet review</h4><p class="panel-note">Copy the email, create a Gmail draft, build the ZIP, or mark the application as sent.</p></div>' + actions + '</div>' + editableFields + '</div>';
   }
 
   function renderDrawer(app) {
     const extracted = app.extracted || {};
     const reqs = Array.isArray(extracted.requirements) ? extracted.requirements : [];
     const mgmt = managementForApp(app);
+    const extractedBlock = (extracted.company || extracted.position || extracted.location || extracted.salary || extracted.deadline || reqs.length) ?
+      '<div class="detail-block"><h4>Extracted from posting</h4><div class="detail-grid">' +
+        detailCard("Company", extracted.company || "Not detected") + detailCard("Position", extracted.position || "Not detected") + detailCard("Location", extracted.location || "Not detected") + detailCard("Salary", extracted.salary || "Not detected") +
+      '</div>' + (extracted.deadline ? '<p class="muted" style="margin-top:10px;font-size:13px;">Deadline: ' + escapeHtml(extracted.deadline) + '</p>' : "") +
+      (reqs.length ? '<ul style="margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:13.5px;">' + reqs.map((r) => '<li>' + escapeHtml(r) + '</li>').join("") + '</ul>' : "") + '</div>' : "";
 
-    const extractedBlock = (extracted.company || extracted.position || extracted.location || extracted.salary || extracted.deadline || reqs.length) ? `
-      <div class="detail-block">
-        <h4>Extracted from posting</h4>
-        <div class="detail-grid">
-          ${detailCard("Company", extracted.company || "Not detected")}
-          ${detailCard("Position", extracted.position || "Not detected")}
-          ${detailCard("Location", extracted.location || "Not detected")}
-          ${detailCard("Salary", extracted.salary || "Not detected")}
-        </div>
-        ${extracted.deadline ? `<p class="muted" style="margin-top:10px;font-size:13px;">Deadline: ${escapeHtml(extracted.deadline)}</p>` : ""}
-        ${reqs.length ? `<ul style="margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:13.5px;">${reqs.map((r) => `<li>${escapeHtml(r)}</li>`).join("")}</ul>` : ""}
-      </div>` : "";
+    const recoBlock = app.cv_recommendation ? '<div class="reco"><h4>AI CV recommendation</h4><p style="font-size:14px;white-space:pre-wrap;">' + escapeHtml(app.cv_recommendation) + '</p></div>' : "";
 
-    const recoBlock = app.cv_recommendation ? `
-      <div class="reco">
-        <h4>AI CV recommendation</h4>
-        <p style="font-size:14px;white-space:pre-wrap;">${escapeHtml(app.cv_recommendation)}</p>
-      </div>` : "";
-
-    refs.drawerContent.innerHTML = `
-      <div class="close-row">
-        <div>
-          <div class="eyebrow">Management view</div>
-          <h2 style="font-size:20px;font-weight:730;letter-spacing:-0.02em;margin-top:2px;">${escapeHtml(app.company || "Untitled application")}</h2>
-          <p class="panel-note">${escapeHtml(app.position || "Role not set")}</p>
-        </div>
-        <button class="icon-btn" type="button" data-action="close-drawer" aria-label="Close">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-        <span class="status ${app.status}">${escapeHtml(statusLabel(app.status))}</span>
-        <span class="tag">${escapeHtml((app.language || "de").toUpperCase())}</span>
-        <span class="tag">${escapeHtml(formatDate(appDate(app)))}</span>
-        <span class="tag">${escapeHtml(cvLabelById(app.selected_cv_id))}</span>
-        ${defaultNextAction(app) ? `<span class="tag">${escapeHtml(defaultNextAction(app))}</span>` : ""}
-      </div>
-
-      <div class="detail-block">
-        <div class="detail-block-head">
-          <div>
-            <h4>Manage application</h4>
-            <p class="panel-note">Track what happens next, then keep the source details tidy.</p>
-          </div>
-        </div>
-        <div class="form-grid">
-          <div class="field"><label for="dwStatus">Status</label><select id="dwStatus">${statusOptionsHtml(app.status)}</select></div>
-          <div class="field"><label for="dwNextAction">Next action</label><input id="dwNextAction" value="${escapeHtml(mgmt.next_action)}" placeholder="${escapeHtml(defaultNextAction(app) || "Follow up, send packet, prep interview")}"></div>
-          <div class="field"><label for="dwFollowUp">Follow-up date</label><input id="dwFollowUp" type="date" value="${escapeHtml(dateInputValue(mgmt.follow_up))}"></div>
-          <div class="field"><label for="dwRecipientName">Recipient name</label><input id="dwRecipientName" value="${escapeHtml(mgmt.contact)}" placeholder="Recruiter or hiring team"></div>
-          <div class="field"><label for="dwRecipientEmail">Recipient email</label><input id="dwRecipientEmail" type="email" value="${escapeHtml(mgmt.recipient_email || "")}" placeholder="recruiting@example.com"></div>
-          <div class="field"><label for="dwChannel">Channel</label><select id="dwChannel">
-            <option value="email"${mgmt.channel === "email" ? " selected" : ""}>Email</option>
-            <option value="portal"${mgmt.channel === "portal" ? " selected" : ""}>Company portal</option>
-            <option value="linkedin"${mgmt.channel === "linkedin" ? " selected" : ""}>LinkedIn</option>
-            <option value="other"${mgmt.channel === "other" ? " selected" : ""}>Other</option>
-          </select></div>
-          <div class="field"><label for="dwCv">CV variant</label><select id="dwCv">${cvOptionsHtml(app.selected_cv_id)}</select></div>
-          <div class="field"><label for="dwCompany">Company</label><input id="dwCompany" value="${escapeHtml(app.company || "")}"></div>
-          <div class="field"><label for="dwPosition">Position</label><input id="dwPosition" value="${escapeHtml(app.position || "")}"></div>
-          <div class="field"><label for="dwSource">Source</label><input id="dwSource" value="${escapeHtml(app.source || "")}"></div>
-          <div class="field"><label for="dwLocation">Location</label><input id="dwLocation" value="${escapeHtml(app.location || "")}"></div>
-          <div class="field"><label for="dwSalary">Salary</label><input id="dwSalary" value="${escapeHtml(app.salary || "")}"></div>
-          <div class="field"><label for="dwDeadline">Deadline</label><input id="dwDeadline" type="date" value="${escapeHtml(dateInputValue(app.deadline))}"></div>
-          <div class="field full"><label for="dwUrl">Job URL</label><input id="dwUrl" type="url" value="${escapeHtml(app.url || "")}" placeholder="https://..."></div>
-        </div>
-        <div class="field full" style="margin-top:14px;">
-          <label for="dwNotes">Notes</label>
-          <textarea id="dwNotes" style="min-height:90px;">${escapeHtml(mgmt.notes || "")}</textarea>
-        </div>
-        <div class="form-actions">
-          <button class="btn" type="button" data-save-meta="${escapeHtml(app.id)}">Save changes</button>
-        </div>
-      </div>
-
-      ${extractedBlock}
-
-      <div class="detail-block">
-        <h4>Generate packet</h4>
-        <div class="ck-row"><input type="checkbox" id="genLetter" checked><label for="genLetter">Cover letter</label></div>
-        <div class="ck-row"><input type="checkbox" id="genEmail" checked><label for="genEmail">Application email</label></div>
-        <div class="field" style="margin-top:10px;max-width:220px;">
-          <label for="genLang">Language</label>
-          <select id="genLang">
-            <option value="de"${(app.language || "de") === "de" ? " selected" : ""}>German (Deutsch)</option>
-            <option value="en"${app.language === "en" ? " selected" : ""}>English</option>
-          </select>
-        </div>
-        <div class="field" style="margin-top:14px;">
-          <label for="genCv">CV to base the letter on</label>
-          <select id="genCv">${cvGenerationOptionsHtml("")}</select>
-          <span class="helper">Default is Auto-pick best CV. Choose a variant only when you want to override the AI.</span>
-        </div>
-        <div class="field" style="margin-top:14px;">
-          <label for="genExtra">Extra instructions (optional)</label>
-          <textarea id="genExtra" placeholder="Tone, points to emphasise, length..."></textarea>
-        </div>
-        ${recoBlock}
-        <div class="form-actions">
-          <button class="btn primary" type="button" data-generate="${escapeHtml(app.id)}" id="generateBtn">Generate packet</button>
-        </div>
-      </div>
-
-      ${renderPacketReview(app, { editable: true })}
-
-      <div class="detail-block">
-        <h4>Documents</h4>
-        ${renderDocList(app)}
-        <div style="height:14px;"></div>
-        <div class="field">
-          <label for="proofUpload">Upload a proof file</label>
-          <input id="proofUpload" type="file">
-          <span class="helper">Confirmation screenshots, emails saved as PDF, offer documents.</span>
-        </div>
-        <div class="form-actions" style="justify-content:space-between;">
-          <button class="btn" type="button" data-upload-proof="${escapeHtml(app.id)}" id="proofBtn">Upload proof</button>
-          <button class="btn primary" type="button" data-bundle="${escapeHtml(app.id)}" id="bundleBtn">Download ZIP</button>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn danger" type="button" data-delete="${escapeHtml(app.id)}">Delete application</button>
-      </div>
-    `;
+    refs.drawerContent.innerHTML =
+      '<div class="close-row"><div><div class="eyebrow">Management view</div>' +
+        '<h2 style="font-size:20px;font-weight:730;letter-spacing:-0.02em;margin-top:2px;">' + escapeHtml(app.company || "Untitled application") + '</h2>' +
+        '<p class="panel-note">' + escapeHtml(app.position || "Role not set") + '</p></div>' +
+        '<button class="icon-btn" type="button" data-action="close-drawer" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">' +
+        '<span class="status ' + app.status + '">' + escapeHtml(statusLabel(app.status)) + '</span>' +
+        '<span class="tag">' + escapeHtml((app.language || "de").toUpperCase()) + '</span>' +
+        '<span class="tag">' + escapeHtml(formatDate(appDate(app))) + '</span>' +
+        '<span class="tag">' + escapeHtml(cvLabelById(app.selected_cv_id)) + '</span>' +
+        (defaultNextAction(app) ? '<span class="tag">' + escapeHtml(defaultNextAction(app)) + '</span>' : "") +
+      '</div>' +
+      '<div class="detail-block"><div class="detail-block-head"><div><h4>Manage application</h4><p class="panel-note">Track what happens next, then keep the source details tidy.</p></div></div>' +
+        '<div class="form-grid">' +
+          '<div class="field"><label for="dwStatus">Status</label><select id="dwStatus">' + statusOptionsHtml(app.status) + '</select></div>' +
+          '<div class="field"><label for="dwNextAction">Next action</label><input id="dwNextAction" value="' + escapeHtml(mgmt.next_action) + '" placeholder="' + escapeHtml(defaultNextAction(app) || "Follow up, send packet, prep interview") + '"></div>' +
+          '<div class="field"><label for="dwFollowUp">Follow-up date</label><input id="dwFollowUp" type="date" value="' + escapeHtml(dateInputValue(mgmt.follow_up)) + '"></div>' +
+          '<div class="field"><label for="dwRecipientName">Recipient name</label><input id="dwRecipientName" value="' + escapeHtml(mgmt.contact) + '" placeholder="Recruiter or hiring team"></div>' +
+          '<div class="field"><label for="dwRecipientEmail">Recipient email</label><input id="dwRecipientEmail" type="email" value="' + escapeHtml(mgmt.recipient_email || "") + '" placeholder="recruiting@example.com"></div>' +
+          '<div class="field"><label for="dwChannel">Channel</label><select id="dwChannel">' + channelOptions(mgmt.channel) + '</select></div>' +
+          '<div class="field"><label for="dwCv">CV variant</label><select id="dwCv">' + cvOptionsHtml(app.selected_cv_id) + '</select></div>' +
+          '<div class="field"><label for="dwCompany">Company</label><input id="dwCompany" value="' + escapeHtml(app.company || "") + '"></div>' +
+          '<div class="field"><label for="dwPosition">Position</label><input id="dwPosition" value="' + escapeHtml(app.position || "") + '"></div>' +
+          '<div class="field"><label for="dwSource">Source</label><input id="dwSource" value="' + escapeHtml(app.source || "") + '"></div>' +
+          '<div class="field"><label for="dwLocation">Location</label><input id="dwLocation" value="' + escapeHtml(app.location || "") + '"></div>' +
+          '<div class="field"><label for="dwSalary">Salary</label><input id="dwSalary" value="' + escapeHtml(app.salary || "") + '"></div>' +
+          '<div class="field"><label for="dwDeadline">Deadline</label><input id="dwDeadline" type="date" value="' + escapeHtml(dateInputValue(app.deadline)) + '"></div>' +
+          '<div class="field full"><label for="dwUrl">Job URL</label><input id="dwUrl" type="url" value="' + escapeHtml(app.url || "") + '" placeholder="https://..."></div>' +
+        '</div>' +
+        '<div class="field full" style="margin-top:14px;"><label for="dwNotes">Notes</label><textarea id="dwNotes" style="min-height:90px;">' + escapeHtml(mgmt.notes || "") + '</textarea></div>' +
+        '<div class="form-actions"><button class="btn" type="button" data-save-meta="' + escapeHtml(app.id) + '">Save changes</button></div>' +
+      '</div>' + extractedBlock +
+      '<div class="detail-block"><h4>Generate packet</h4>' +
+        '<div class="ck-row"><input type="checkbox" id="genLetter" checked><label for="genLetter">Cover letter</label></div>' +
+        '<div class="ck-row"><input type="checkbox" id="genEmail" checked><label for="genEmail">Application email</label></div>' +
+        '<div class="field" style="margin-top:10px;max-width:220px;"><label for="genLang">Language</label><select id="genLang"><option value="de"' + ((app.language || "de") === "de" ? " selected" : "") + '>German (Deutsch)</option><option value="en"' + (app.language === "en" ? " selected" : "") + '>English</option></select></div>' +
+        '<div class="field" style="margin-top:14px;"><label for="genCv">CV to base the letter on</label><select id="genCv">' + cvGenerationOptionsHtml("") + '</select><span class="helper">Default is Auto-pick best CV. Choose a variant only when you want to override the AI.</span></div>' +
+        '<div class="field" style="margin-top:14px;"><label for="genExtra">Extra instructions (optional)</label><textarea id="genExtra" placeholder="Tone, points to emphasise, length..."></textarea></div>' +
+        recoBlock +
+        '<div class="form-actions"><button class="btn primary" type="button" data-generate="' + escapeHtml(app.id) + '" id="generateBtn">Generate packet</button></div>' +
+      '</div>' + renderPacketReview(app, { editable: true }) +
+      '<div class="detail-block"><h4>Documents</h4>' + renderDocList(app) +
+        '<div style="height:14px;"></div><div class="field"><label for="proofUpload">Upload a proof file</label><input id="proofUpload" type="file"><span class="helper">Confirmation screenshots, emails saved as PDF, offer documents.</span></div>' +
+        '<div class="form-actions" style="justify-content:space-between;"><button class="btn" type="button" data-upload-proof="' + escapeHtml(app.id) + '" id="proofBtn">Upload proof</button><button class="btn primary" type="button" data-bundle="' + escapeHtml(app.id) + '" id="bundleBtn">Download ZIP</button></div>' +
+      '</div>' +
+      '<div class="form-actions"><button class="btn danger" type="button" data-delete="' + escapeHtml(app.id) + '">Delete application</button></div>';
   }
 
   function renderDocList(app) {
     const docs = app.documents || [];
-    if (!docs.length) return `<p class="muted" style="font-size:13.5px;">No documents yet. Generate a letter or upload a proof.</p>`;
-    return `<div class="file-list">${docs.map((d) => `
-      <div class="file-row">
-        <div>
-          <div class="file-name"><span class="tag">${escapeHtml(docKindLabels[d.kind] || d.kind)}</span> ${escapeHtml(d.filename || "")}</div>
-          <div class="file-meta">${formatBytes(d.size)} &middot; ${escapeHtml(formatDate(d.created_at))}</div>
-        </div>
-        <div class="file-actions">
-          <button class="btn small" type="button" data-doc-view="${escapeHtml(d.id)}">View</button>
-          <button class="btn small danger" type="button" data-doc-delete="${escapeHtml(app.id)}:${escapeHtml(d.id)}">Delete</button>
-        </div>
-      </div>
-    `).join("")}</div>`;
+    if (!docs.length) return '<p class="muted" style="font-size:13.5px;">No documents yet. Generate a letter or upload a proof.</p>';
+    return '<div class="file-list">' + docs.map((d) =>
+      '<div class="file-row"><div><div class="file-name"><span class="tag">' + escapeHtml(docKindLabels[d.kind] || d.kind) + '</span> ' + escapeHtml(d.filename || "") + '</div>' +
+      '<div class="file-meta">' + formatBytes(d.size) + ' &middot; ' + escapeHtml(formatDate(d.created_at)) + '</div></div>' +
+      '<div class="file-actions"><button class="btn small" type="button" data-doc-view="' + escapeHtml(d.id) + '">View</button><button class="btn small danger" type="button" data-doc-delete="' + escapeHtml(app.id) + ':' + escapeHtml(d.id) + '">Delete</button></div></div>'
+    ).join("") + '</div>';
   }
 
-  /* ---------- Drawer actions ---------- */
   async function saveMeta(id) {
     const app = getApp(id);
     const status = document.getElementById("dwStatus")?.value;
@@ -2707,8 +1960,7 @@
     const nativeManagement = hasNativeManagement(app);
     const notes = nativeManagement ? management.notes : buildManagementNotes(management);
     const payload = {
-      status,
-      selected_cv_id: selected || null,
+      status, selected_cv_id: selected || null,
       company: document.getElementById("dwCompany")?.value || "",
       position: document.getElementById("dwPosition")?.value || "",
       source: document.getElementById("dwSource")?.value || "",
@@ -2726,10 +1978,7 @@
       payload.application_channel = management.channel || "email";
     }
     try {
-      const updated = await api(`/api/applications/${id}`, {
-        method: "PATCH",
-        json: payload,
-      });
+      const updated = await api(`/api/applications/${id}`, { method: "PATCH", json: payload });
       applications = applications.map((a) => (String(a.id) === String(id) ? updated : a));
       renderAll();
       renderDrawer(updated);
@@ -2741,9 +1990,8 @@
     const motivation_letter = document.getElementById("edLetter")?.value || "";
     const email_subject = document.getElementById("edSubject")?.value || "";
     const email_body = document.getElementById("edBody")?.value || "";
-    const payload = { motivation_letter, email_subject, email_body };
     try {
-      const updated = await api(`/api/applications/${id}/packet`, { method: "PUT", json: payload });
+      const updated = await api(`/api/applications/${id}/packet`, { method: "PUT", json: { motivation_letter, email_subject, email_body } });
       applications = applications.map((a) => (String(a.id) === String(id) ? updated : a));
       if (intakeDraftApp && String(intakeDraftApp.id) === String(id)) intakeDraftApp = updated;
       renderAll();
@@ -2762,10 +2010,7 @@
     const extra_instructions = document.getElementById("genExtra")?.value || "";
     setLoading(btn, true, "Generating... (up to 90s)");
     try {
-      const updated = await api(`/api/applications/${id}/generate`, {
-        method: "POST",
-        json: { language, produce_letter, produce_email, cv_id: cvVal || null, extra_instructions },
-      });
+      const updated = await api(`/api/applications/${id}/generate`, { method: "POST", json: { language, produce_letter, produce_email, cv_id: cvVal || null, extra_instructions } });
       applications = applications.map((a) => (String(a.id) === String(id) ? updated : a));
       renderAll();
       renderDrawer(updated);
@@ -2820,7 +2065,6 @@
         intakeDraftApp = updated;
         if (refs.intakeModal.classList.contains("open")) renderIntakeWizard();
       }
-      // Trigger the download via the document download URL.
       window.location.href = `/api/documents/${doc.id}/download`;
       toast("ZIP ready.", "success");
     } catch (e) {
@@ -2849,19 +2093,14 @@
     renderTable();
   }
 
-  /* ---------- View documents / CVs in a new tab ---------- */
   function viewUrl(url) { window.open(url, "_blank", "noopener"); }
 
   async function copyToClipboard(value, label) {
     const text = String(value || "");
-    if (!text.trim()) {
-      toast(`No ${label} to copy.`, "error");
-      return;
-    }
+    if (!text.trim()) { toast(`No ${label} to copy.`, "error"); return; }
     try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
+      if (navigator.clipboard?.writeText) { await navigator.clipboard.writeText(text); }
+      else {
         const area = document.createElement("textarea");
         area.value = text;
         area.setAttribute("readonly", "");
@@ -2873,9 +2112,7 @@
         area.remove();
       }
       toast(`${label} copied.`, "success");
-    } catch (e) {
-      toast(`Could not copy ${label}.`, "error");
-    }
+    } catch (e) { toast(`Could not copy ${label}.`, "error"); }
   }
 
   function copyPacketPart(id, part) {
@@ -2889,30 +2126,19 @@
   async function redirectToGmailConnect() {
     try {
       const status = await api("/api/gmail/status");
-      if (!status.configured) {
-        toast("Gmail OAuth is not configured on the server yet.", "error");
-        return;
-      }
+      if (!status.configured) { toast("Gmail OAuth is not configured on the server yet.", "error"); return; }
       window.location.href = "/api/gmail/connect";
-    } catch (e) {
-      toast(e.message, "error");
-    }
+    } catch (e) { toast(e.message, "error"); }
   }
 
   async function createGmailDraft(id) {
     const app = getApp(id);
     if (!app) return;
     const packet = packetText(app);
-    if (!packet.subject.trim() && !packet.body.trim()) {
-      toast("Generate an email before creating a Gmail draft.", "error");
-      return;
-    }
+    if (!packet.subject.trim() && !packet.body.trim()) { toast("Generate an email before creating a Gmail draft.", "error"); return; }
     const mgmt = managementForApp(app);
     try {
-      const result = await api(`/api/applications/${id}/gmail-draft`, {
-        method: "POST",
-        json: { to: mgmt.recipient_email || "", subject: packet.subject, body: packet.body },
-      });
+      const result = await api(`/api/applications/${id}/gmail-draft`, { method: "POST", json: { to: mgmt.recipient_email || "", subject: packet.subject, body: packet.body } });
       const updated = result?.application;
       if (updated) {
         applications = applications.map((item) => (String(item.id) === String(id) ? updated : item));
@@ -2923,10 +2149,7 @@
       }
       toast("Gmail draft created.", "success");
     } catch (e) {
-      if (e.status === 409 && /connect gmail/i.test(e.message)) {
-        await redirectToGmailConnect();
-        return;
-      }
+      if (e.status === 409 && /connect gmail/i.test(e.message)) { await redirectToGmailConnect(); return; }
       toast(e.message, "error");
     }
   }
@@ -2957,22 +2180,16 @@
       payload.notes = buildManagementNotes(management);
     }
     try {
-      const updated = await api(`/api/applications/${id}`, {
-        method: "PATCH",
-        json: payload,
-      });
+      const updated = await api(`/api/applications/${id}`, { method: "PATCH", json: payload });
       applications = applications.map((item) => (String(item.id) === String(id) ? updated : item));
       if (intakeDraftApp && String(intakeDraftApp.id) === String(id)) intakeDraftApp = updated;
       renderAll();
       if (String(openApplicationId) === String(id)) renderDrawer(updated);
       if (refs.intakeModal.classList.contains("open")) renderIntakeWizard();
       toast("Marked as applied.", "success");
-    } catch (e) {
-      toast(e.message, "error");
-    }
+    } catch (e) { toast(e.message, "error"); }
   }
 
-  /* ===================== EVENTS ===================== */
   refs.themeToggle.addEventListener("click", toggleTheme);
   refs.loginForm.addEventListener("submit", handleLogin);
   refs.logoutBtn.addEventListener("click", handleLogout);
@@ -3005,6 +2222,7 @@
     if (action === "intake-back") intakeBack();
     if (action === "close-drawer") closeDrawer();
     if (action === "clear-filters") clearFilters();
+    if (action === "gmail-connect") { await redirectToGmailConnect(); return; }
     if (target.dataset.open) openApplication(target.dataset.open);
     if (target.dataset.delete) await deleteApplication(target.dataset.delete);
     if (target.dataset.saveMeta) await saveMeta(target.dataset.saveMeta);
@@ -3045,17 +2263,17 @@
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      // Never let Escape dismiss the required-profile modal.
       if (refs.requiredProfileModal.classList.contains("open")) return;
       closeIntake();
       closeDrawer();
     }
   });
 
-  /* ===================== BOOT ===================== */
   setPage(currentTab);
   bootSession();
 })();
+
 </script>
+
 </body>
 </html>

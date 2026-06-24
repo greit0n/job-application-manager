@@ -5,7 +5,6 @@ All endpoints are scoped to the logged-in user. The AI client is injected via th
 """
 from __future__ import annotations
 
-import re
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -23,17 +22,12 @@ from ..schemas import ApplicationOut, DocumentOut, GenerateRequest
 from ..services import bundle as bundle_svc
 from ..services import generation as gen_svc
 from ..services import intake as intake_svc
-from ..services import pdf as pdf_svc
+from ..services import packet as packet_svc
 from ..services.ai_client import AIClient, get_ai_client
 from ..services.cv_text import ensure_cv_text
 from ..services.storage import get_storage
 
 router = APIRouter(prefix="/applications", tags=["ai"])
-
-_DE_MONTHS = [
-    "Januar", "Februar", "März", "April", "Mai", "Juni",
-    "Juli", "August", "September", "Oktober", "November", "Dezember",
-]
 
 
 def get_ai() -> AIClient:
@@ -58,19 +52,6 @@ def _get_or_create_profile(db: Session, user: User) -> Profile:
     return user.profile
 
 
-def _slug(value: str, fallback: str = "Application") -> str:
-    cleaned = re.sub(r"[^\w\s-]", "", value or "", flags=re.UNICODE).strip()
-    cleaned = re.sub(r"[\s]+", "_", cleaned)
-    return cleaned or fallback
-
-
-def _format_date(language: str) -> str:
-    now = datetime.now()
-    if language == "de":
-        return f"{now.day}. {_DE_MONTHS[now.month - 1]} {now.year}"
-    return now.strftime("%d %B %Y")
-
-
 def _parse_deadline(value: str):
     if not value:
         return None
@@ -82,7 +63,7 @@ def _parse_deadline(value: str):
     return None
 
 
-# ─── Intake: paste / URL / upload → a draft application ────────────────────
+# Intake: paste / URL / upload to a draft application.
 @router.post("/intake", response_model=ApplicationOut, status_code=status.HTTP_201_CREATED)
 async def intake_application(
     mode: str = Form("paste"),
@@ -161,7 +142,7 @@ async def intake_application(
     return app
 
 
-# ─── Generate: AI writes the letter/email, picks the CV, renders PDFs ──────
+# Generate: AI writes the letter/email, picks the CV, renders PDFs.
 @router.post("/{app_id}/generate", response_model=ApplicationOut)
 def generate_documents(
     app_id: int,
@@ -266,9 +247,8 @@ def generate_documents(
         if match is not None:
             app.selected_cv_id = match.id
 
-    db.commit()
-
     def _audit_error(message: str) -> None:
+        db.rollback()
         db.add(
             Generation(
                 application_id=app.id,
@@ -282,75 +262,22 @@ def generate_documents(
         )
         db.commit()
 
-    # Render the new documents IN MEMORY first; only once they (and their uploads)
-    # succeed do we delete the previous generated files. A render or storage failure
-    # then leaves the prior good output intact rather than wiping it.
-    company_slug = _slug(app.company or extracted.get("company") or "")
-    pending: list[tuple[str, bytes, str, str]] = []  # (kind, data, filename, mime)
-
     try:
-        if payload.produce_letter and app.motivation_letter.strip():
-            sender = {
-                "name": profile.name,
-                "address": profile.address,
-                "phone": profile.phone,
-                "email": profile.email,
-            }
-            position = app.position or extracted.get("position") or ""
-            subject = app.email_subject or (
-                f"Bewerbung als {position}" if language == "de" else f"Application for {position}"
-            )
-            pdf_bytes = pdf_svc.render_letter_pdf(
-                sender=sender,
-                subject=subject,
-                body=app.motivation_letter,
-                date_str=_format_date(language),
-                language=language,
-            )
-            pending.append(
-                ("motivation_letter", pdf_bytes, f"Cover_Letter_{company_slug}.pdf", "application/pdf")
-            )
-
-        if payload.produce_email and (app.email_body.strip() or app.email_subject.strip()):
-            body = f"Subject: {app.email_subject}\n\n{app.email_body}\n".encode("utf-8")
-            pending.append(
-                ("email", body, f"Email_{company_slug}.txt", "text/plain; charset=utf-8")
-            )
-    except Exception as exc:  # ReportLab etc. - prior documents are left untouched.
+        packet_svc.sync_packet_documents(
+            db=db,
+            application=app,
+            profile=profile,
+            user_id=user.id,
+            include_letter=payload.produce_letter,
+            include_email=payload.produce_email,
+            storage=storage,
+        )
+    except packet_svc.PacketRenderError as exc:
         _audit_error(f"render failed: {exc}")
         raise HTTPException(status_code=500, detail=f"Document rendering failed: {exc}") from exc
-
-    # Upload the freshly rendered bytes first (new uuid keys; old files untouched).
-    stored: list[tuple[str, str, int, str, str]] = []  # (kind, key, size, filename, mime)
-    try:
-        for kind, data, fn, mime in pending:
-            key = f"{user.id}/app-{app.id}/{kind}/{uuid.uuid4().hex}_{fn}"
-            storage.put(key, data, content_type=mime)
-            stored.append((kind, key, len(data), fn, mime))
-    except Exception as exc:  # storage hiccup - prior documents still intact.
+    except packet_svc.PacketStorageError as exc:
         _audit_error(f"storage failed: {exc}")
         raise HTTPException(status_code=502, detail=f"Storing documents failed: {exc}") from exc
-
-    # Now it is safe to swap: drop the previous generated letter/email, add the new.
-    for doc in list(app.documents):
-        if doc.kind in ("motivation_letter", "email"):
-            try:
-                storage.delete(doc.r2_key)
-            except Exception:
-                pass
-            db.delete(doc)
-    for kind, key, size, fn, mime in stored:
-        db.add(
-            Document(
-                application_id=app.id,
-                user_id=user.id,
-                kind=kind,
-                r2_key=key,
-                filename=fn,
-                mime=mime,
-                size=size,
-            )
-        )
 
     db.add(
         Generation(
@@ -367,7 +294,7 @@ def generate_documents(
     return app
 
 
-# ─── Bundle: CV + letter + email → a downloadable ZIP ──────────────────────
+# Bundle: CV + letter + email to a downloadable ZIP.
 @router.post("/{app_id}/bundle", response_model=DocumentOut)
 def bundle_documents(
     app_id: int,
@@ -378,23 +305,18 @@ def bundle_documents(
     profile = _get_or_create_profile(db, user)
     storage = get_storage()
 
-    files: list[tuple[str, bytes]] = []
-
+    selected_cv = None
     if app.selected_cv_id:
         cv = db.get(CVVariant, app.selected_cv_id)
         if cv is not None and cv.user_id == user.id:
-            try:
-                cv_name = f"CV_{_slug(profile.name, 'CV')}.pdf"
-                files.append((cv_name, storage.get(cv.r2_key)))
-            except Exception:
-                pass
+            selected_cv = cv
 
-    for doc in app.documents:
-        if doc.kind in ("motivation_letter", "email"):
-            try:
-                files.append((doc.filename, storage.get(doc.r2_key)))
-            except Exception:
-                pass
+    files = packet_svc.collect_bundle_files(
+        application=app,
+        profile=profile,
+        storage=storage,
+        selected_cv=selected_cv,
+    )
 
     if not files:
         raise HTTPException(
@@ -413,7 +335,7 @@ def bundle_documents(
             db.delete(doc)
     db.commit()
 
-    fn = f"Application_{_slug(app.company)}.zip"
+    fn = f"Application_{packet_svc.slug(app.company)}.zip"
     key = f"{user.id}/app-{app.id}/zip/{uuid.uuid4().hex}_{fn}"
     storage.put(key, zip_bytes, content_type="application/zip")
     doc = Document(

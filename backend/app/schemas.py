@@ -10,7 +10,7 @@ class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-# ─── Auth ──────────────────────────────────────────────────────────
+# Auth
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
@@ -22,7 +22,7 @@ class UserOut(ORMModel):
     display_name: str
 
 
-# ─── Profile ───────────────────────────────────────────────────────
+# Profile
 class ProfileIn(BaseModel):
     name: str = ""
     address: str = ""
@@ -38,7 +38,7 @@ class ProfileOut(ProfileIn, ORMModel):
     updated_at: datetime | None = None
 
 
-# ─── CV variants ───────────────────────────────────────────────────
+# CV variants
 class CVOut(ORMModel):
     id: int
     label: str
@@ -58,7 +58,7 @@ class CVUpdate(BaseModel):
     is_default: bool | None = None
 
 
-# ─── Applications ──────────────────────────────────────────────────
+# Applications
 class ApplicationIn(BaseModel):
     company: str = ""
     position: str = ""
@@ -69,6 +69,12 @@ class ApplicationIn(BaseModel):
     location: str = ""
     url: str = ""
     deadline: date | None = None
+    application_channel: str = "email"
+    recipient_name: str = ""
+    recipient_email: str = ""
+    next_action: str = ""
+    follow_up_date: date | None = None
+    last_activity_at: date | None = None
     notes: str = ""
     selected_cv_id: int | None = None
     job_text: str = ""
@@ -84,12 +90,25 @@ class ApplicationUpdate(BaseModel):
     location: str | None = None
     url: str | None = None
     deadline: date | None = None
+    application_channel: str | None = None
+    recipient_name: str | None = None
+    recipient_email: str | None = None
+    next_action: str | None = None
+    follow_up_date: date | None = None
+    last_activity_at: date | None = None
     notes: str | None = None
     selected_cv_id: int | None = None
     job_text: str | None = None
     motivation_letter: str | None = None
     email_subject: str | None = None
     email_body: str | None = None
+
+
+class ApplicationPacketUpdate(BaseModel):
+    motivation_letter: str | None = None
+    email_subject: str | None = None
+    email_body: str | None = None
+    language: str | None = None
 
 
 class DocumentOut(ORMModel):
@@ -101,7 +120,7 @@ class DocumentOut(ORMModel):
     created_at: datetime | None = None
 
 
-# ─── Intake & AI generation ────────────────────────────────────────
+# Intake and AI generation
 class IntakeRequest(BaseModel):
     """JSON intake (paste text or URL). File uploads use multipart instead."""
 
@@ -134,6 +153,12 @@ class ApplicationOut(ORMModel):
     location: str
     url: str
     deadline: date | None = None
+    application_channel: str
+    recipient_name: str
+    recipient_email: str
+    next_action: str
+    follow_up_date: date | None = None
+    last_activity_at: date | None = None
     notes: str
     selected_cv_id: int | None = None
     job_text: str
@@ -142,6 +167,33 @@ class ApplicationOut(ORMModel):
     email_subject: str
     email_body: str
     cv_recommendation: str
+    gmail_draft_id: str
+    gmail_drafted_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
     documents: list[DocumentOut] = Field(default_factory=list)
+
+
+# Gmail OAuth / drafts
+class GmailStatusOut(BaseModel):
+    configured: bool
+    connected: bool
+    email: str = ""
+    scope: str = ""
+    expires_at: datetime | None = None
+
+
+class GmailDraftRequest(BaseModel):
+    to: str = ""
+    cc: str = ""
+    bcc: str = ""
+    subject: str | None = None
+    body: str | None = None
+
+
+class GmailDraftOut(BaseModel):
+    gmail_draft_id: str
+    to_email: str
+    subject: str
+    gmail_drafted_at: datetime | None = None
+    application: ApplicationOut

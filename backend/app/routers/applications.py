@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 
 from ..auth import get_current_user
 from ..db import get_db
-from ..models import STATUSES, Application, User
-from ..schemas import ApplicationIn, ApplicationOut, ApplicationUpdate
+from ..models import STATUSES, Application, CVVariant, Profile, User
+from ..schemas import ApplicationIn, ApplicationOut, ApplicationPacketUpdate, ApplicationUpdate
+from ..services import packet as packet_svc
 from ..services.storage import get_storage
 
 router = APIRouter(prefix="/applications", tags=["applications"])
@@ -24,6 +25,23 @@ def _owned_app(db: Session, user: User, app_id: int) -> Application:
 def _validate_status(value: str) -> None:
     if value not in STATUSES:
         raise HTTPException(status_code=422, detail=f"Invalid status; expected one of {STATUSES}")
+
+
+def _validate_selected_cv_id(db: Session, user: User, cv_id: int | None) -> None:
+    if cv_id is None:
+        return
+    cv = db.get(CVVariant, cv_id)
+    if cv is None or cv.user_id != user.id:
+        raise HTTPException(status_code=422, detail="selected_cv_id not found")
+
+
+def _get_or_create_profile(db: Session, user: User) -> Profile:
+    if user.profile is not None:
+        return user.profile
+    profile = Profile(user_id=user.id)
+    db.add(profile)
+    db.flush()
+    return profile
 
 
 @router.get("", response_model=list[ApplicationOut])
@@ -44,6 +62,7 @@ def create_application(
     db: Session = Depends(get_db),
 ) -> Application:
     _validate_status(payload.status)
+    _validate_selected_cv_id(db, user, payload.selected_cv_id)
     app = Application(user_id=user.id, **payload.model_dump())
     db.add(app)
     db.commit()
@@ -67,16 +86,55 @@ def update_application(
     data = payload.model_dump(exclude_unset=True)
     if "status" in data:
         _validate_status(data["status"])
-    if data.get("selected_cv_id") is not None:
-        from ..models import CVVariant
-
-        cv = db.get(CVVariant, data["selected_cv_id"])
-        if cv is None or cv.user_id != user.id:
-            raise HTTPException(status_code=422, detail="selected_cv_id not found")
+    if "selected_cv_id" in data:
+        _validate_selected_cv_id(db, user, data["selected_cv_id"])
     for field, value in data.items():
         setattr(app, field, value)
     db.commit()
     db.refresh(app)
+    return app
+
+
+@router.put("/{app_id}/packet", response_model=ApplicationOut)
+def update_application_packet(
+    app_id: int,
+    payload: ApplicationPacketUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Application:
+    app = _owned_app(db, user, app_id)
+    data = payload.model_dump(exclude_unset=True)
+
+    if "language" in data and data["language"] is not None:
+        if data["language"] not in ("de", "en"):
+            raise HTTPException(status_code=422, detail="Invalid language; expected de or en")
+        app.language = data["language"]
+
+    for field in ("motivation_letter", "email_subject", "email_body"):
+        if field in data and data[field] is not None:
+            setattr(app, field, data[field])
+
+    profile = _get_or_create_profile(db, user)
+    if (app.motivation_letter or "").strip() and not (profile.name.strip() and profile.address.strip()):
+        db.rollback()
+        raise HTTPException(
+            status_code=422,
+            detail="Complete your profile (name and address) before rendering a letter.",
+        )
+
+    try:
+        packet_svc.sync_packet_documents(
+            db=db,
+            application=app,
+            profile=profile,
+            user_id=user.id,
+            include_letter=True,
+            include_email=True,
+        )
+    except packet_svc.PacketRenderError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    except packet_svc.PacketStorageError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
     return app
 
 

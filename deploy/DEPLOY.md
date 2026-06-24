@@ -2,7 +2,7 @@
 
 Isolated per the global ops model: own user `jobsapp`, own port `127.0.0.1:8095`, own
 DB on the host Postgres cluster (`:5433`), own R2 bucket, cloudflared-tunneled
-`jobs.fezle.io`. **Fezle owns 80/443 — never touch its nginx/compose.**
+`jobs.fezle.io`. **Fezle owns 80/443 - never touch its nginx/compose.**
 
 Host: `168.119.58.28` (Ubuntu 24.04).
 
@@ -64,9 +64,17 @@ CLAUDE_BIN=/home/jobsapp/.npm-global/bin/claude   # adjust to the real path (`wh
 CLAUDE_CODE_OAUTH_TOKEN=<token from step 4>
 CLAUDE_MODEL=                                      # empty = CLI default; "opus" to force
 CLAUDE_TIMEOUT=180
+GMAIL_OAUTH_CLIENT_ID=<google-oauth-client-id>
+GMAIL_OAUTH_CLIENT_SECRET=<google-oauth-client-secret>
+GMAIL_OAUTH_REDIRECT_URI=https://jobs.fezle.io/api/gmail/callback
+GMAIL_TOKEN_ENCRYPTION_KEY=<python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())">
 ```
 > If the subscription path ever hits limits or terms issues, flip to
-> `AI_BACKEND=anthropic_api` and set `ANTHROPIC_API_KEY=...` — no code change.
+> `AI_BACKEND=anthropic_api` and set `ANTHROPIC_API_KEY=...` - no code change.
+>
+> Gmail uses Google OAuth + Gmail API draft creation only. Add the redirect URI
+> above to the Google OAuth Web application and add the two app users as test
+> users if the OAuth consent screen is not production-verified.
 
 ## 6. systemd
 Install `deploy/jobsapp.service` (binds `127.0.0.1:8095`, `EnvironmentFile=.../backend/.env`):
@@ -78,12 +86,12 @@ curl -s http://127.0.0.1:8095/api/health     # {"status":"ok","env":"prod"}
 ```
 
 ## 7. Tunnel
-Follow `deploy/cloudflared-ingress.md`: add the `jobs.fezle.io → http://localhost:8095`
+Follow `deploy/cloudflared-ingress.md`: add the `jobs.fezle.io -> http://localhost:8095`
 ingress rule, `cloudflared tunnel route dns <tunnel> jobs.fezle.io`, restart cloudflared.
 Then `curl -s https://jobs.fezle.io/api/health`.
 
 ## 8. Seed the two accounts
-Passwords are generated locally and handed to georg out-of-band — **never commit them**.
+Passwords are generated locally and handed to georg out-of-band - **never commit them**.
 Run once per user (idempotent upsert by email):
 ```bash
 cd /home/jobsapp/app/backend
@@ -95,15 +103,16 @@ sudo -iu jobsapp bash -lc 'cd ~/app/backend && .venv/bin/python -m app.seed \
 
 ## 9. First login (per user)
 On first login the app **forces a profile completion modal** (name, address, phone,
-email are required — they appear on the generated Motivationsschreiben sender block).
+email are required - they appear on the generated Motivationsschreiben sender block).
 Each user then uploads their CV variant(s) under **CVs**, marking one as default and
 adding "when to use" notes so the AI can recommend the right one per job.
 
 ## 10. Verify end-to-end
-At `https://jobs.fezle.io`: log in → complete profile → upload a CV → add an application
-(paste a real posting) → Generate (DE) → confirm the letter/email look right and the CV
-was recommended → Download ZIP → reopen the application and see all documents. Then
-confirm per-user isolation (the other account sees none of it).
+At `https://jobs.fezle.io`: log in -> complete profile -> upload a CV -> Apply to job
+(paste a real posting) -> Generate packet (DE) -> confirm the letter/email look right and
+the CV was recommended -> Save an edit and confirm the ZIP uses the edited email ->
+connect Gmail -> create a Gmail draft -> confirm the draft appears in Gmail Drafts.
+Then confirm per-user isolation (the other account sees none of it).
 
 ## 11. After the deploy
 Update `/root/SERVER_REGISTRY.md` (port 8095, DB `jobsapp`, domain, `/home/jobsapp`) and

@@ -41,22 +41,54 @@ def test_application_crud(client):
     login(client)
     created = client.post(
         "/api/applications",
-        json={"company": "Greentube", "position": "Lead IT Architect", "language": "de"},
+        json={
+            "company": "Greentube",
+            "position": "Lead IT Architect",
+            "language": "de",
+            "application_channel": "email",
+            "recipient_name": "Hiring Team",
+            "recipient_email": "jobs@example.com",
+            "next_action": "Send application",
+            "follow_up_date": "2026-07-01",
+        },
     )
     assert created.status_code == 201
-    app_id = created.json()["id"]
+    body = created.json()
+    app_id = body["id"]
+    assert body["recipient_email"] == "jobs@example.com"
+    assert body["next_action"] == "Send application"
+    assert body["follow_up_date"] == "2026-07-01"
 
     assert client.get("/api/applications").json().__len__() == 1
 
-    patched = client.patch(f"/api/applications/{app_id}", json={"status": "applied", "notes": "sent"})
+    patched = client.patch(
+        f"/api/applications/{app_id}",
+        json={"status": "applied", "notes": "sent", "last_activity_at": "2026-07-02"},
+    )
     assert patched.status_code == 200
     assert patched.json()["status"] == "applied"
+    assert patched.json()["last_activity_at"] == "2026-07-02"
 
     # invalid status rejected
     assert client.patch(f"/api/applications/{app_id}", json={"status": "bogus"}).status_code == 422
 
     assert client.delete(f"/api/applications/{app_id}").status_code == 204
     assert client.get(f"/api/applications/{app_id}").status_code == 404
+
+
+def test_application_create_rejects_other_users_cv(client):
+    login(client, "b@example.com", "pw-b")
+    cv_resp = client.post(
+        "/api/cvs",
+        files={"file": ("CV_B.pdf", b"%PDF-1.4 fake cv bytes", "application/pdf")},
+        data={"label": "B only", "language": "de"},
+    )
+    assert cv_resp.status_code == 201, cv_resp.text
+    other_cv_id = cv_resp.json()["id"]
+
+    login(client, "a@example.com", "pw-a")
+    resp = client.post("/api/applications", json={"company": "A-Corp", "selected_cv_id": other_cv_id})
+    assert resp.status_code == 422
 
 
 def test_cv_upload_download_roundtrip(client):
@@ -94,7 +126,7 @@ def test_profile_drops_content_fields(client):
             "name": "Georgi", "address": "Wien", "phone": "+43", "email": "g@example.com",
             "languages": "German native", "availability": "Immediate",
             "preferences": "Remote ok",
-            # legacy keys a stale client might still send — must be ignored, not stored:
+            # legacy keys a stale client might still send; ignore instead of storing:
             "headline": "X", "skills": "Y", "summary": "Z", "employers": [{"name": "Old"}],
         },
     )

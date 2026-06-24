@@ -5,6 +5,9 @@ services and the storage layer, without touching the network or a real Claude.
 """
 from __future__ import annotations
 
+import io
+import zipfile
+
 import pytest
 
 from app.routers.generation import get_ai
@@ -29,7 +32,7 @@ class FakeAI:
         "motivation_letter": (
             "Sehr geehrte Damen und Herren,\n\n"
             "mit großem Interesse bewerbe ich mich. Bei Fezle habe ich Ähnliches gebaut.\n\n"
-            "Mit freundlichen Grüßen\n\nGeorgi Damyanov"
+            "Mit freundlichen Grüßen\n\nMax Mustermann"
         ),
         "email_subject": "Bewerbung als Senior Engineer",
         "email_body": "Anbei meine Unterlagen. Über ein Gespräch freue ich mich.",
@@ -53,10 +56,10 @@ def _fill_profile(client):
     resp = client.put(
         "/api/profile",
         json={
-            "name": "Georgi Damyanov",
-            "address": "Hafinger Weg 8/3, 3100 St. Pölten",
-            "phone": "+43 681 20858721",
-            "email": "georgi@example.com",
+            "name": "Max Mustermann",
+            "address": "Musterstrasse 1, 1010 Wien",
+            "phone": "+43 1 234567",
+            "email": "max@example.com",
         },
     )
     assert resp.status_code == 200, resp.text
@@ -120,6 +123,46 @@ def test_full_flow(client, ai_client):
     zdl = client.get(f"/api/documents/{zip_doc['id']}/download")
     assert zdl.status_code == 200
     assert zdl.content[:2] == b"PK"
+
+
+def test_packet_edits_rerender_documents_and_zip(client, ai_client):
+    login(client)
+    _fill_profile(client)
+    _upload_cv(client)
+
+    app_id = client.post(
+        "/api/applications/intake",
+        data={"mode": "paste", "text": "Senior Engineer at Acme", "language": "de"},
+    ).json()["id"]
+    gen = client.post(
+        f"/api/applications/{app_id}/generate",
+        json={"language": "de", "produce_letter": True, "produce_email": True, "cv_id": None},
+    )
+    assert gen.status_code == 200, gen.text
+
+    packet = client.put(
+        f"/api/applications/{app_id}/packet",
+        json={
+            "motivation_letter": "Sehr geehrte Damen und Herren,\n\nAktualisierte Version.\n\nMit freundlichen Grüßen\n\nMax Mustermann",
+            "email_subject": "Bewerbung als Senior Engineer",
+            "email_body": "UPDATED EMAIL BODY",
+            "language": "de",
+        },
+    )
+    assert packet.status_code == 200, packet.text
+    updated = packet.json()
+    email_doc = next(d for d in updated["documents"] if d["kind"] == "email")
+    email_download = client.get(f"/api/documents/{email_doc['id']}/download")
+    assert email_download.status_code == 200
+    assert b"UPDATED EMAIL BODY" in email_download.content
+
+    bundle = client.post(f"/api/applications/{app_id}/bundle")
+    assert bundle.status_code == 200, bundle.text
+    zdl = client.get(f"/api/documents/{bundle.json()['id']}/download")
+    with zipfile.ZipFile(io.BytesIO(zdl.content)) as zf:
+        email_names = [name for name in zf.namelist() if name.startswith("Email_")]
+        assert email_names
+        assert "UPDATED EMAIL BODY" in zf.read(email_names[0]).decode("utf-8")
 
 
 def test_generate_scoping(client, ai_client):

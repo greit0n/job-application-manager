@@ -392,7 +392,7 @@
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
-    /* each stage lifted higher than the previous → ascending trajectory */
+    /* each stage lifted higher than the previous for an ascending trajectory */
     padding-bottom: calc(var(--i) * 20px);
   }
   .stage-bar {
@@ -466,7 +466,7 @@
   select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a6b82' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
   html[data-theme="dark"] select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aabc4' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
 
-  /* ---------- Applications list (table → cards) ---------- */
+  /* ---------- Applications list (table to cards) ---------- */
   .apps { padding: 6px 8px 10px; }
   .apps-head, .app-row {
     display: grid;
@@ -523,6 +523,9 @@
   }
   .focus-item .co { font-weight: 650; }
   .focus-item .role { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .focus-action { display: grid; gap: 4px; min-width: 0; }
+  .focus-action .next { color: var(--text); font-weight: 720; font-size: 13.5px; }
+  .focus-action .meta { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* ---------- Cards (applications grid) ---------- */
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
@@ -592,12 +595,116 @@
   .seg button { padding: 0 16px; min-height: 40px; font-size: 13.5px; font-weight: 600; color: var(--muted); }
   .seg button.active { background: var(--accent-soft); color: var(--accent); }
 
+  /* ---------- Intake wizard ---------- */
+  .wizard-stepper {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .wizard-step {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    padding: 10px 11px;
+  }
+  .wizard-step .num {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 7px;
+  }
+  .wizard-step strong {
+    display: block;
+    font-size: 12.5px;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wizard-step span { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .wizard-step.active {
+    background: var(--accent-soft);
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  }
+  .wizard-step.active .num { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .wizard-step.done .num { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .wizard-body { min-height: 410px; }
+  .wizard-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr); gap: 18px; align-items: start; }
+  .wizard-aside {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    background: var(--surface-2);
+    display: grid;
+    gap: 10px;
+  }
+  .wizard-aside h3 { font-size: 13px; font-weight: 720; }
+  .wizard-aside p, .wizard-aside li { color: var(--muted); font-size: 12.5px; }
+  .wizard-aside ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .choice-list { display: grid; gap: 10px; }
+  .choice-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 11px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    background: var(--surface-2);
+  }
+  .choice-row input { width: 18px; height: 18px; min-height: 0; margin-top: 2px; accent-color: var(--accent); }
+  .choice-row strong { display: block; font-size: 13.5px; }
+  .choice-row span { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .packet-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .packet-preview {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    padding: 13px;
+    display: grid;
+    gap: 10px;
+  }
+  .packet-preview h5 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0;
+  }
+  .packet-preview pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .packet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .packet-grid .wide { grid-column: 1 / -1; }
+  .mini-summary { display: grid; gap: 8px; }
+  .mini-summary .row { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 7px; }
+  .mini-summary .row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .mini-summary span { color: var(--muted); font-size: 12px; }
+  .mini-summary b { font-size: 12.5px; text-align: right; }
+
   /* ---------- Drawer ---------- */
   .drawer { position: fixed; inset: 0; display: none; z-index: 40; }
   .drawer.open { display: block; }
   .drawer-backdrop { position: absolute; inset: 0; background: rgba(6, 15, 31, 0.5); backdrop-filter: blur(2px); }
   .drawer-panel {
-    position: absolute; top: 0; right: 0; width: min(640px, 100%); height: 100%;
+    position: absolute; top: 0; right: 0; width: min(760px, 100%); height: 100%;
     background: var(--surface); box-shadow: var(--shadow-lg); padding: 24px; overflow-y: auto;
     animation: slideIn 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
@@ -608,6 +715,8 @@
   .detail-card p { font-size: 14px; word-break: break-word; }
   .detail-block { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 15px; margin-top: 14px; }
   .detail-block h4 { font-size: 13px; font-weight: 700; margin-bottom: 9px; }
+  .detail-block-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 10px; }
+  .detail-block-head h4 { margin-bottom: 2px; }
   .reco { border: 1px solid color-mix(in srgb, var(--teal) 34%, var(--line)); border-left: 3px solid var(--teal); background: color-mix(in srgb, var(--teal) 7%, var(--surface)); border-radius: var(--radius-sm); padding: 13px 15px; margin-top: 14px; }
   .reco h4 { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; }
 
@@ -656,6 +765,7 @@
   @media (max-width: 1080px) {
     .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .board { grid-template-columns: 1fr; }
+    .wizard-layout { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 860px) {
@@ -676,7 +786,7 @@
     main.content { padding: 18px 16px 110px; }
     .split { grid-template-columns: 1fr; }
 
-    /* Applications: table grid → stacked cards */
+    /* Applications: table grid to stacked cards */
     .apps-head { display: none; }
     .app-row {
       grid-template-columns: 1fr auto;
@@ -705,6 +815,8 @@
     .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
     .form-grid { grid-template-columns: 1fr; }
     .detail-grid { grid-template-columns: 1fr; }
+    .packet-grid { grid-template-columns: 1fr; }
+    .wizard-stepper { grid-template-columns: 1fr 1fr; }
     .toolbar { grid-template-columns: 1fr; }
     .pipeline { height: 130px; }
   }
@@ -806,7 +918,7 @@
         </button>
         <button class="btn primary" type="button" data-action="new-application">
           <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-          <span>Add application</span>
+          <span>Apply to job</span>
         </button>
       </div>
     </header>
@@ -859,7 +971,7 @@
           <aside class="panel panel-pad">
             <div class="eyebrow">Next moves</div>
             <div class="panel-title" style="margin-bottom:4px;">Needs attention</div>
-            <p class="panel-note" style="margin-bottom:14px;">Leads to chase, interviews to prep, and offers to answer.</p>
+            <p class="panel-note" style="margin-bottom:14px;">Action-based queue from packet state, follow-up dates, and management fields.</p>
             <div id="focusList" class="focus-list"></div>
           </aside>
         </div>
@@ -874,7 +986,7 @@
             </div>
             <button class="btn primary" type="button" data-action="new-application">
               <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-              Add application
+              Apply to job
             </button>
           </div>
           <div class="panel-pad" id="applicationCards"></div>
@@ -997,52 +1109,21 @@
   <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="intakeTitle">
     <div class="close-row">
       <div>
-        <h2 id="intakeTitle">Add application</h2>
-        <p class="panel-note">Drop a job posting; we create a draft you can generate from.</p>
+        <h2 id="intakeTitle">Apply to job</h2>
+        <p class="panel-note">Drop the posting, confirm the basics, generate the packet, then review it before sending.</p>
       </div>
       <button class="icon-btn" type="button" data-action="close-intake" aria-label="Close">
         <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
     <form id="intakeForm" autocomplete="off">
-      <div class="tabs" role="tablist" aria-label="Intake method">
-        <button type="button" class="active" data-intake-tab="paste" role="tab" aria-selected="true">Paste text</button>
-        <button type="button" data-intake-tab="url" role="tab" aria-selected="false">Paste URL</button>
-        <button type="button" data-intake-tab="upload" role="tab" aria-selected="false">Upload posting</button>
-      </div>
-
-      <div class="tab-panel active" data-intake-panel="paste">
-        <div class="field">
-          <label for="intakeText">Job posting text</label>
-          <textarea id="intakeText" name="text" style="min-height:200px;" placeholder="Paste the full job posting here..."></textarea>
-        </div>
-      </div>
-      <div class="tab-panel" data-intake-panel="url">
-        <div class="field">
-          <label for="intakeUrl">Job posting URL</label>
-          <input id="intakeUrl" name="url" type="url" placeholder="https://...">
-          <span class="helper">We fetch and read the posting from this link.</span>
-        </div>
-      </div>
-      <div class="tab-panel" data-intake-panel="upload">
-        <div class="field">
-          <label for="intakeFile">Posting file (PDF or image)</label>
-          <input id="intakeFile" name="file" type="file" accept=".pdf,application/pdf,image/*">
-          <span class="helper">The original posting is stored with the application.</span>
-        </div>
-      </div>
-
-      <div class="field" style="margin-top:16px; max-width:240px;">
-        <label for="intakeLanguage">Generation language</label>
-        <select id="intakeLanguage" name="language">
-          <option value="de">German (Deutsch)</option>
-          <option value="en">English</option>
-        </select>
-      </div>
+      <div id="intakeStepper" class="wizard-stepper" aria-label="Application packet steps"></div>
+      <div id="intakeWizardBody" class="wizard-body"></div>
 
       <div class="form-actions">
+        <button class="btn ghost" type="button" data-action="intake-back" id="intakeBack">Back</button>
         <button class="btn ghost" type="button" data-action="close-intake">Cancel</button>
-        <button class="btn primary" type="submit" id="intakeSubmit">Create draft</button>
+        <button class="btn primary" type="submit" id="intakeSubmit">Continue</button>
       </div>
     </form>
   </div>
@@ -1120,6 +1201,16 @@
     proof: "Proof",
   };
 
+  const intakeSteps = [
+    { key: "drop", label: "Drop job", hint: "Posting source" },
+    { key: "basics", label: "Confirm basics", hint: "Role details" },
+    { key: "generate", label: "Generate packet", hint: "CV and outputs" },
+    { key: "review", label: "Review packet", hint: "Send actions" },
+  ];
+
+  const MGMT_START = "[[job-manager-management]]";
+  const MGMT_END = "[[/job-manager-management]]";
+
   /* ---------- App data (server-backed; no localStorage data) ---------- */
   let user = null;
   let profile = null;
@@ -1131,6 +1222,9 @@
   let sortMode = "date-desc";
   let openApplicationId = "";
   let intakeTab = "paste";
+  let intakeStepIndex = 0;
+  let intakeDraftApp = null;
+  let intakeData = initialIntakeData();
 
   const refs = {
     authScreen: document.getElementById("authScreen"),
@@ -1161,7 +1255,9 @@
     intakeModal: document.getElementById("intakeModal"),
     intakeForm: document.getElementById("intakeForm"),
     intakeSubmit: document.getElementById("intakeSubmit"),
-    intakeLanguage: document.getElementById("intakeLanguage"),
+    intakeBack: document.getElementById("intakeBack"),
+    intakeStepper: document.getElementById("intakeStepper"),
+    intakeWizardBody: document.getElementById("intakeWizardBody"),
     requiredProfileModal: document.getElementById("requiredProfileModal"),
     requiredProfileForm: document.getElementById("requiredProfileForm"),
     reqProfileSubmit: document.getElementById("reqProfileSubmit"),
@@ -1230,6 +1326,153 @@
     const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
     if (!parts.length) return "?";
     return (parts[0][0] + (parts[1]?.[0] || "")).toUpperCase();
+  }
+
+  function initialIntakeData() {
+    return {
+      mode: "paste",
+      text: "",
+      url: "",
+      file: null,
+      language: "de",
+      company: "",
+      position: "",
+      source: "",
+      location: "",
+      salary: "",
+      deadline: "",
+      application_channel: "email",
+      recipient_name: "",
+      recipient_email: "",
+      produce_letter: true,
+      produce_email: true,
+      cv_id: "",
+      extra_instructions: "",
+    };
+  }
+
+  function dateInputValue(value) {
+    if (!value) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value);
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toISOString().slice(0, 10);
+  }
+
+  function addDaysIso(days) {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return date.toISOString().slice(0, 10);
+  }
+
+  function hasPacket(app) {
+    return Boolean((app?.motivation_letter || "").trim() || (app?.email_subject || "").trim() || (app?.email_body || "").trim());
+  }
+
+  function hasDocumentKind(app, kind) {
+    return (app?.documents || []).some((doc) => doc.kind === kind);
+  }
+
+  function parseManagementNotes(notes) {
+    const raw = String(notes || "");
+    const defaults = { next_action: "", follow_up: "", contact: "", channel: "", notes: raw.trim() };
+    const start = raw.indexOf(MGMT_START);
+    const end = raw.indexOf(MGMT_END);
+    if (start === -1 || end === -1 || end < start) return defaults;
+
+    const block = raw.slice(start + MGMT_START.length, end).trim();
+    const visible = (raw.slice(0, start) + raw.slice(end + MGMT_END.length)).trim();
+    const parsed = { ...defaults, notes: visible };
+    block.split(/\r?\n/).forEach((line) => {
+      const idx = line.indexOf(":");
+      if (idx === -1) return;
+      const key = line.slice(0, idx).trim();
+      const value = line.slice(idx + 1).trim();
+      if (Object.prototype.hasOwnProperty.call(parsed, key)) parsed[key] = value;
+    });
+    return parsed;
+  }
+
+  function buildManagementNotes({ next_action, follow_up, contact, channel, notes }) {
+    const fields = {
+      next_action: String(next_action || "").trim(),
+      follow_up: String(follow_up || "").trim(),
+      contact: String(contact || "").trim(),
+      channel: String(channel || "").trim(),
+    };
+    const hasMgmt = Object.values(fields).some(Boolean);
+    const cleanNotes = String(notes || "").trim();
+    if (!hasMgmt) return cleanNotes;
+    const block = [
+      MGMT_START,
+      `next_action: ${fields.next_action}`,
+      `follow_up: ${fields.follow_up}`,
+      `contact: ${fields.contact}`,
+      `channel: ${fields.channel}`,
+      MGMT_END,
+    ].join("\n");
+    return [block, cleanNotes].filter(Boolean).join("\n\n");
+  }
+
+  function hasNativeManagement(app) {
+    return Boolean(app && (
+      Object.prototype.hasOwnProperty.call(app, "next_action") ||
+      Object.prototype.hasOwnProperty.call(app, "follow_up_date") ||
+      Object.prototype.hasOwnProperty.call(app, "recipient_email") ||
+      Object.prototype.hasOwnProperty.call(app, "application_channel")
+    ));
+  }
+
+  function managementForApp(app) {
+    const parsed = parseManagementNotes(app?.notes || "");
+    if (!hasNativeManagement(app)) return { ...parsed, recipient_email: "" };
+    return {
+      next_action: app.next_action || parsed.next_action || "",
+      follow_up: dateInputValue(app.follow_up_date) || parsed.follow_up || "",
+      contact: app.recipient_name || parsed.contact || "",
+      recipient_email: app.recipient_email || "",
+      channel: app.application_channel || parsed.channel || "",
+      notes: parsed.notes || "",
+    };
+  }
+
+  function visibleNotes(app) {
+    return managementForApp(app).notes;
+  }
+
+  function defaultNextAction(app) {
+    const mgmt = managementForApp(app);
+    if (mgmt.next_action) return mgmt.next_action;
+    if (app.status === "pending" && !hasPacket(app)) return "Generate application packet";
+    if (app.status === "pending" && hasPacket(app)) return "Send application";
+    if (app.status === "applied" && mgmt.follow_up) return `Follow up on ${formatDate(mgmt.follow_up)}`;
+    if (app.status === "interview") return "Prepare interview";
+    if (app.status === "offer") return "Decide on offer";
+    return "";
+  }
+
+  function actionMeta(app) {
+    const mgmt = managementForApp(app);
+    const parts = [];
+    if (mgmt.follow_up) parts.push(`Follow-up ${formatDate(mgmt.follow_up)}`);
+    if (mgmt.contact) parts.push(mgmt.contact);
+    if (mgmt.recipient_email) parts.push(mgmt.recipient_email);
+    if (mgmt.channel) parts.push(mgmt.channel);
+    if (!parts.length && app.deadline) parts.push(`Deadline ${formatDate(app.deadline)}`);
+    if (!parts.length && app.status === "pending" && hasPacket(app)) parts.push("Packet ready");
+    if (!parts.length && app.status === "pending") parts.push("Draft needs generation");
+    return parts.join(" - ");
+  }
+
+  function packetText(app) {
+    const subjectEl = document.getElementById("edSubject");
+    const bodyEl = document.getElementById("edBody");
+    const letterEl = document.getElementById("edLetter");
+    return {
+      subject: subjectEl ? subjectEl.value : (app?.email_subject || ""),
+      body: bodyEl ? bodyEl.value : (app?.email_body || ""),
+      letter: letterEl ? letterEl.value : (app?.motivation_letter || ""),
+    };
   }
 
   /* ---------- Toasts ---------- */
@@ -1468,7 +1711,8 @@
     if (term) {
       apps = apps.filter((app) => [
         app.company, app.position, app.status, app.source,
-        app.location, app.salary, app.notes, cvLabelById(app.selected_cv_id),
+        app.location, app.salary, app.notes, app.next_action, app.recipient_name,
+        app.recipient_email, app.application_channel, cvLabelById(app.selected_cv_id),
       ].join(" ").toLowerCase().includes(term));
     }
     const [key, dir] = sortMode.split("-");
@@ -1533,7 +1777,7 @@
           : "Drop your first job posting to start tracking your search.",
         action: isFiltered
           ? `<button class="btn" type="button" data-action="clear-filters">Clear filters</button>`
-          : `<button class="btn primary" type="button" data-action="new-application">Add application</button>`,
+          : `<button class="btn primary" type="button" data-action="new-application">Apply to job</button>`,
       });
       return;
     }
@@ -1570,7 +1814,7 @@
       refs.applicationCards.innerHTML = emptyState({
         title: "No applications yet",
         hint: "Add your first application to build out your tracker.",
-        action: `<button class="btn primary" type="button" data-action="new-application">Add application</button>`,
+        action: `<button class="btn primary" type="button" data-action="new-application">Apply to job</button>`,
       });
       return;
     }
@@ -1585,7 +1829,7 @@
             </div>
             <span class="status ${app.status}">${escapeHtml(statusLabel(app.status))}</span>
           </div>
-          <p class="card-notes">${escapeHtml(app.notes || "No notes yet.")}</p>
+          <p class="card-notes">${escapeHtml(visibleNotes(app) || defaultNextAction(app) || "No notes yet.")}</p>
           <div class="card-foot">
             <span class="when">${escapeHtml(formatDate(appDate(app)))}</span>
             <button class="btn small" type="button" data-open="${escapeHtml(app.id)}">Open details</button>
@@ -1619,21 +1863,30 @@
     ).join("");
 
     const focus = applications
-      .filter((app) => ["pending", "interview", "offer"].includes(app.status))
-      .sort((a, b) => String(appDate(a) || "9999").localeCompare(String(appDate(b) || "9999")))
+      .map((app) => ({ app, action: defaultNextAction(app), meta: actionMeta(app) }))
+      .filter((item) => item.action && !["rejected", "filled"].includes(item.app.status))
+      .sort((a, b) => {
+        const am = managementForApp(a.app);
+        const bm = managementForApp(b.app);
+        const ad = am.follow_up || a.app.deadline || appDate(a.app) || "9999";
+        const bd = bm.follow_up || b.app.deadline || appDate(b.app) || "9999";
+        return String(ad).localeCompare(String(bd));
+      })
       .slice(0, 6);
 
-    refs.focusList.innerHTML = focus.length ? focus.map((app) => `
+    refs.focusList.innerHTML = focus.length ? focus.map(({ app, action, meta }) => `
       <div class="focus-item">
-        <div>
+        <div class="focus-action">
+          <div class="next">${escapeHtml(action)}</div>
           <div class="co">${escapeHtml(app.company || "Untitled")}</div>
           <div class="role">${escapeHtml(app.position || "Role not set")} &middot; ${escapeHtml(statusLabel(app.status))}</div>
+          ${meta ? `<div class="meta">${escapeHtml(meta)}</div>` : ""}
         </div>
         <button class="btn small" type="button" data-open="${escapeHtml(app.id)}">Open</button>
       </div>
     `).join("") : emptyState({
       title: "All caught up",
-      hint: "Leads, interviews, and offers waiting on you will show up here.",
+      hint: "Applications with a concrete next action will show up here.",
     });
   }
 
@@ -1750,19 +2003,27 @@
 
   /* ---------- Intake ---------- */
   function openIntake() {
+    closeDrawer();
     refs.intakeForm.reset();
-    setIntakeTab("paste");
-    refs.intakeLanguage.value = "de";
+    intakeData = initialIntakeData();
+    intakeDraftApp = null;
+    intakeStepIndex = 0;
+    intakeTab = "paste";
+    renderIntakeWizard();
     refs.intakeModal.classList.add("open");
     refs.intakeModal.setAttribute("aria-hidden", "false");
-    document.getElementById("intakeText").focus();
+    setTimeout(() => document.getElementById("intakeText")?.focus(), 0);
   }
+
   function closeIntake() {
     refs.intakeModal.classList.remove("open");
     refs.intakeModal.setAttribute("aria-hidden", "true");
   }
+
   function setIntakeTab(tab) {
+    captureIntakeStep();
     intakeTab = tab;
+    intakeData.mode = tab;
     refs.intakeModal.querySelectorAll("[data-intake-tab]").forEach((b) => {
       const on = b.dataset.intakeTab === tab;
       b.classList.toggle("active", on);
@@ -1773,38 +2034,383 @@
     });
   }
 
-  async function handleIntakeSubmit(event) {
-    event.preventDefault();
-    const language = refs.intakeLanguage.value || "de";
-    const payload = new FormData();
-    payload.append("mode", intakeTab);
-    payload.append("language", language);
-    if (intakeTab === "paste") {
-      const text = document.getElementById("intakeText").value.trim();
-      if (!text) { toast("Paste the job posting text first.", "error"); return; }
-      payload.append("text", text);
-    } else if (intakeTab === "url") {
-      const url = document.getElementById("intakeUrl").value.trim();
-      if (!url) { toast("Enter a job posting URL first.", "error"); return; }
-      payload.append("url", url);
-    } else {
-      const file = document.getElementById("intakeFile").files[0];
-      if (!file) { toast("Choose a posting file first.", "error"); return; }
-      payload.append("file", file);
+  function captureIntakeStep() {
+    const text = document.getElementById("intakeText");
+    const url = document.getElementById("intakeUrl");
+    const file = document.getElementById("intakeFile");
+    const company = document.getElementById("intakeCompany");
+    const position = document.getElementById("intakePosition");
+    const source = document.getElementById("intakeSource");
+    const location = document.getElementById("intakeLocation");
+    const salary = document.getElementById("intakeSalary");
+    const deadline = document.getElementById("intakeDeadline");
+    const channel = document.getElementById("intakeChannel");
+    const recipientName = document.getElementById("intakeRecipientName");
+    const recipientEmail = document.getElementById("intakeRecipientEmail");
+    const basicLanguage = document.getElementById("intakeBasicLanguage");
+    const genLanguage = document.getElementById("wizGenLang");
+    const genLetter = document.getElementById("wizGenLetter");
+    const genEmail = document.getElementById("wizGenEmail");
+    const genCv = document.getElementById("wizGenCv");
+    const genExtra = document.getElementById("wizGenExtra");
+
+    if (text) intakeData.text = text.value;
+    if (url) intakeData.url = url.value;
+    if (file?.files?.[0]) intakeData.file = file.files[0];
+    if (company) intakeData.company = company.value;
+    if (position) intakeData.position = position.value;
+    if (source) intakeData.source = source.value;
+    if (location) intakeData.location = location.value;
+    if (salary) intakeData.salary = salary.value;
+    if (deadline) intakeData.deadline = deadline.value;
+    if (channel) intakeData.application_channel = channel.value;
+    if (recipientName) intakeData.recipient_name = recipientName.value;
+    if (recipientEmail) intakeData.recipient_email = recipientEmail.value;
+    if (basicLanguage) intakeData.language = basicLanguage.value;
+    if (genLanguage) intakeData.language = genLanguage.value;
+    if (genLetter) intakeData.produce_letter = genLetter.checked;
+    if (genEmail) intakeData.produce_email = genEmail.checked;
+    if (genCv) intakeData.cv_id = genCv.value;
+    if (genExtra) intakeData.extra_instructions = genExtra.value;
+  }
+
+  function validateDropStep() {
+    if (intakeData.mode === "paste" && !intakeData.text.trim()) {
+      toast("Paste the job posting text first.", "error");
+      return false;
     }
-    setLoading(refs.intakeSubmit, true, "Creating...");
+    if (intakeData.mode === "url" && !intakeData.url.trim()) {
+      toast("Enter a job posting URL first.", "error");
+      return false;
+    }
+    if (intakeData.mode === "upload" && !intakeData.file) {
+      toast("Choose a posting file first.", "error");
+      return false;
+    }
+    return true;
+  }
+
+  function setIntakeStep(index) {
+    intakeStepIndex = Math.max(0, Math.min(index, intakeSteps.length - 1));
+    renderIntakeWizard();
+  }
+
+  function renderIntakeWizard() {
+    const current = intakeSteps[intakeStepIndex];
+    refs.intakeStepper.innerHTML = intakeSteps.map((step, index) => `
+      <div class="wizard-step${index === intakeStepIndex ? " active" : ""}${index < intakeStepIndex ? " done" : ""}">
+        <span class="num">${index + 1}</span>
+        <strong>${escapeHtml(step.label)}</strong>
+        <span>${escapeHtml(step.hint)}</span>
+      </div>
+    `).join("");
+
+    const labels = ["Continue", intakeDraftApp ? "Save basics" : "Create draft", "Generate packet", "Open management"];
+    refs.intakeBack.classList.toggle("hidden", intakeStepIndex === 0);
+    refs.intakeSubmit.disabled = false;
+    refs.intakeSubmit.textContent = labels[intakeStepIndex] || "Continue";
+
+    if (current.key === "drop") refs.intakeWizardBody.innerHTML = renderIntakeDropStep();
+    if (current.key === "basics") refs.intakeWizardBody.innerHTML = renderIntakeBasicsStep();
+    if (current.key === "generate") refs.intakeWizardBody.innerHTML = renderIntakeGenerateStep();
+    if (current.key === "review") refs.intakeWizardBody.innerHTML = renderIntakeReviewStep();
+
+    if (current.key === "drop") setIntakeTab(intakeData.mode || "paste");
+  }
+
+  function renderIntakeDropStep() {
+    return `
+      <div class="wizard-layout">
+        <div>
+          <div class="tabs" role="tablist" aria-label="Intake method">
+            <button type="button" class="active" data-intake-tab="paste" role="tab" aria-selected="true">Paste text</button>
+            <button type="button" data-intake-tab="url" role="tab" aria-selected="false">Paste URL</button>
+            <button type="button" data-intake-tab="upload" role="tab" aria-selected="false">Upload posting</button>
+          </div>
+          <div class="tab-panel active" data-intake-panel="paste">
+            <div class="field">
+              <label for="intakeText">Job posting text</label>
+              <textarea id="intakeText" name="text" style="min-height:250px;" placeholder="Paste the full job posting here...">${escapeHtml(intakeData.text)}</textarea>
+            </div>
+          </div>
+          <div class="tab-panel" data-intake-panel="url">
+            <div class="field">
+              <label for="intakeUrl">Job posting URL</label>
+              <input id="intakeUrl" name="url" type="url" placeholder="https://..." value="${escapeHtml(intakeData.url)}">
+              <span class="helper">The backend fetches and reads the posting from this link.</span>
+            </div>
+          </div>
+          <div class="tab-panel" data-intake-panel="upload">
+            <div class="field">
+              <label for="intakeFile">Posting file (PDF or image)</label>
+              <input id="intakeFile" name="file" type="file" accept=".pdf,application/pdf,image/*">
+              <span class="helper">${intakeData.file ? `Selected: ${escapeHtml(intakeData.file.name)}` : "The original posting is stored with the application."}</span>
+            </div>
+          </div>
+        </div>
+        <aside class="wizard-aside">
+          <h3>What happens here</h3>
+          <ul>
+            <li>The posting is stored as the source for this application.</li>
+            <li>URL and file extraction happen on the backend.</li>
+            <li>You can still correct company and role on the next step.</li>
+          </ul>
+        </aside>
+      </div>
+    `;
+  }
+
+  function renderIntakeBasicsStep() {
+    const sourceHint = intakeData.mode === "url" ? intakeData.url : intakeData.mode === "upload" && intakeData.file ? intakeData.file.name : "Pasted text";
+    return `
+      <div class="wizard-layout">
+        <div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="intakeCompany">Company</label>
+              <input id="intakeCompany" value="${escapeHtml(intakeData.company)}" placeholder="Company name">
+            </div>
+            <div class="field">
+              <label for="intakePosition">Position</label>
+              <input id="intakePosition" value="${escapeHtml(intakeData.position)}" placeholder="Role title">
+            </div>
+            <div class="field">
+              <label for="intakeBasicLanguage">Packet language</label>
+              <select id="intakeBasicLanguage">
+                <option value="de"${intakeData.language === "de" ? " selected" : ""}>German (Deutsch)</option>
+                <option value="en"${intakeData.language === "en" ? " selected" : ""}>English</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="intakeSource">Source</label>
+              <input id="intakeSource" value="${escapeHtml(intakeData.source)}" placeholder="${escapeHtml(sourceHint)}">
+            </div>
+            <div class="field">
+              <label for="intakeLocation">Location</label>
+              <input id="intakeLocation" value="${escapeHtml(intakeData.location)}" placeholder="Vienna, remote, hybrid">
+            </div>
+            <div class="field">
+              <label for="intakeSalary">Salary</label>
+              <input id="intakeSalary" value="${escapeHtml(intakeData.salary)}" placeholder="Optional">
+            </div>
+            <div class="field">
+              <label for="intakeDeadline">Deadline</label>
+              <input id="intakeDeadline" type="date" value="${escapeHtml(dateInputValue(intakeData.deadline))}">
+            </div>
+            <div class="field">
+              <label for="intakeChannel">Application channel</label>
+              <select id="intakeChannel">
+                <option value="email"${intakeData.application_channel === "email" ? " selected" : ""}>Email</option>
+                <option value="portal"${intakeData.application_channel === "portal" ? " selected" : ""}>Company portal</option>
+                <option value="linkedin"${intakeData.application_channel === "linkedin" ? " selected" : ""}>LinkedIn</option>
+                <option value="other"${intakeData.application_channel === "other" ? " selected" : ""}>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="intakeRecipientName">Recipient name</label>
+              <input id="intakeRecipientName" value="${escapeHtml(intakeData.recipient_name)}" placeholder="Recruiter or hiring team">
+            </div>
+            <div class="field">
+              <label for="intakeRecipientEmail">Recipient email</label>
+              <input id="intakeRecipientEmail" type="email" value="${escapeHtml(intakeData.recipient_email)}" placeholder="jobs@example.com">
+            </div>
+          </div>
+        </div>
+        <aside class="wizard-aside">
+          <h3>Confirm before AI</h3>
+          <p>These fields make the packet easier to review later. The AI can still backfill missing company, role, location, salary, and deadline during generation.</p>
+          <div class="mini-summary">
+            <div class="row"><span>Input</span><b>${escapeHtml(intakeData.mode)}</b></div>
+            <div class="row"><span>Language</span><b>${escapeHtml(intakeData.language.toUpperCase())}</b></div>
+          </div>
+        </aside>
+      </div>
+    `;
+  }
+
+  function renderIntakeGenerateStep() {
+    return `
+      <div class="wizard-layout">
+        <div>
+          <div class="choice-list">
+            <label class="choice-row" for="wizGenLetter">
+              <input type="checkbox" id="wizGenLetter"${intakeData.produce_letter ? " checked" : ""}>
+              <span><strong>Motivationsschreiben</strong><span>Generate the cover letter PDF content grounded in the selected CV text.</span></span>
+            </label>
+            <label class="choice-row" for="wizGenEmail">
+              <input type="checkbox" id="wizGenEmail"${intakeData.produce_email ? " checked" : ""}>
+              <span><strong>Application email</strong><span>Generate a shorter email with subject and body.</span></span>
+            </label>
+          </div>
+          <div class="form-grid" style="margin-top:16px;">
+            <div class="field">
+              <label for="wizGenLang">Packet language</label>
+              <select id="wizGenLang">
+                <option value="de"${intakeData.language === "de" ? " selected" : ""}>German (Deutsch)</option>
+                <option value="en"${intakeData.language === "en" ? " selected" : ""}>English</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="wizGenCv">CV selection</label>
+              <select id="wizGenCv">${cvGenerationOptionsHtml(intakeData.cv_id)}</select>
+              <span class="helper">Default is Auto-pick best CV. Choose a variant only when you want to override the AI.</span>
+            </div>
+            <div class="field full">
+              <label for="wizGenExtra">Extra instructions</label>
+              <textarea id="wizGenExtra" placeholder="Tone, points to emphasise, anything to avoid...">${escapeHtml(intakeData.extra_instructions)}</textarea>
+            </div>
+          </div>
+        </div>
+        <aside class="wizard-aside">
+          <h3>CV grounding</h3>
+          ${cvs.length
+            ? `<p>${cvs.length} CV variant${cvs.length === 1 ? "" : "s"} available. Auto-pick lets the backend use the AI recommendation and then saves the chosen variant when it matches.</p>`
+            : `<div class="notice warn">Upload a readable CV before generating. The backend will reject generation without CV text.</div>`}
+          ${intakeDraftApp ? `<div class="mini-summary">
+            <div class="row"><span>Draft</span><b>${escapeHtml(intakeDraftApp.company || "Untitled")}</b></div>
+            <div class="row"><span>Status</span><b>${escapeHtml(statusLabel(intakeDraftApp.status))}</b></div>
+          </div>` : ""}
+        </aside>
+      </div>
+    `;
+  }
+
+  function renderIntakeReviewStep() {
+    const app = intakeDraftApp;
+    if (!app) {
+      return `<div class="notice warn">Create a draft first, then generate the application packet.</div>`;
+    }
+    return `
+      <div class="wizard-layout">
+        <div>
+          ${renderPacketReview(app, { editable: false })}
+        </div>
+        <aside class="wizard-aside">
+          <h3>Ready to send</h3>
+          <div class="mini-summary">
+            <div class="row"><span>Company</span><b>${escapeHtml(app.company || "Untitled")}</b></div>
+            <div class="row"><span>Role</span><b>${escapeHtml(app.position || "Role not set")}</b></div>
+            <div class="row"><span>CV</span><b>${escapeHtml(cvLabelById(app.selected_cv_id))}</b></div>
+            <div class="row"><span>ZIP</span><b>${hasDocumentKind(app, "zip") ? "Ready" : "Build when needed"}</b></div>
+          </div>
+          <p>Use the packet actions to copy the email, open Gmail, download the bundle, or mark this application as applied.</p>
+        </aside>
+      </div>
+    `;
+  }
+
+  async function createOrUpdateIntakeDraft() {
+    const btn = refs.intakeSubmit;
+    const wasExisting = Boolean(intakeDraftApp);
+    setLoading(btn, true, intakeDraftApp ? "Saving..." : "Creating...");
+    const payload = new FormData();
+    payload.append("mode", intakeData.mode);
+    payload.append("language", intakeData.language || "de");
+    payload.append("company", String(intakeData.company || "").trim());
+    payload.append("position", String(intakeData.position || "").trim());
+    if (intakeData.mode === "paste") {
+      payload.append("text", String(intakeData.text || "").trim());
+    } else if (intakeData.mode === "url") {
+      payload.append("url", String(intakeData.url || "").trim());
+    } else {
+      payload.append("file", intakeData.file);
+    }
+
     try {
-      const app = await api("/api/applications/intake", { method: "POST", form: payload });
-      applications = [app, ...applications];
+      let app = intakeDraftApp;
+      if (!app) {
+        app = await api("/api/applications/intake", { method: "POST", form: payload });
+        applications = [app, ...applications];
+      }
+      const patch = {
+        company: String(intakeData.company || "").trim(),
+        position: String(intakeData.position || "").trim(),
+        language: intakeData.language || "de",
+        source: String(intakeData.source || app.source || "").trim(),
+        location: String(intakeData.location || "").trim(),
+        salary: String(intakeData.salary || "").trim(),
+        deadline: intakeData.deadline || null,
+        application_channel: intakeData.application_channel || "email",
+        recipient_name: String(intakeData.recipient_name || "").trim(),
+        recipient_email: String(intakeData.recipient_email || "").trim(),
+      };
+      app = await api(`/api/applications/${app.id}`, { method: "PATCH", json: patch });
+      intakeDraftApp = app;
+      applications = applications.map((item) => (String(item.id) === String(app.id) ? app : item));
       renderAll();
-      closeIntake();
-      openApplication(app.id);
-      toast("Draft created. Generate documents from the drawer.", "success");
+      toast(wasExisting ? "Draft saved." : "Draft created.", "success");
+      return app;
     } catch (e) {
       toast(e.message, "error");
+      return null;
     } finally {
-      setLoading(refs.intakeSubmit, false, "Create draft");
+      setLoading(btn, false, intakeDraftApp ? "Save basics" : "Create draft");
     }
+  }
+
+  async function generateIntakePacket() {
+    if (!intakeDraftApp) return null;
+    if (!intakeData.produce_letter && !intakeData.produce_email) {
+      toast("Select at least one document to produce.", "error");
+      return null;
+    }
+    const btn = refs.intakeSubmit;
+    setLoading(btn, true, "Generating... (up to 90s)");
+    try {
+      const updated = await api(`/api/applications/${intakeDraftApp.id}/generate`, {
+        method: "POST",
+        json: {
+          language: intakeData.language || "de",
+          produce_letter: intakeData.produce_letter,
+          produce_email: intakeData.produce_email,
+          cv_id: intakeData.cv_id ? Number(intakeData.cv_id) : null,
+          extra_instructions: intakeData.extra_instructions || "",
+        },
+      });
+      intakeDraftApp = updated;
+      applications = applications.map((item) => (String(item.id) === String(updated.id) ? updated : item));
+      renderAll();
+      toast("Packet generated.", "success");
+      return updated;
+    } catch (e) {
+      toast(e.message, "error");
+      return null;
+    } finally {
+      setLoading(btn, false, "Generate packet");
+    }
+  }
+
+  async function handleIntakeSubmit(event) {
+    event.preventDefault();
+    captureIntakeStep();
+
+    if (intakeSteps[intakeStepIndex].key === "drop") {
+      if (!validateDropStep()) return;
+      setIntakeStep(1);
+      return;
+    }
+
+    if (intakeSteps[intakeStepIndex].key === "basics") {
+      const app = await createOrUpdateIntakeDraft();
+      if (app) setIntakeStep(2);
+      return;
+    }
+
+    if (intakeSteps[intakeStepIndex].key === "generate") {
+      const app = await generateIntakePacket();
+      if (app) setIntakeStep(3);
+      return;
+    }
+
+    if (intakeDraftApp) {
+      closeIntake();
+      openApplication(intakeDraftApp.id);
+    }
+  }
+
+  function intakeBack() {
+    captureIntakeStep();
+    if (intakeStepIndex > 0) setIntakeStep(intakeStepIndex - 1);
   }
 
   /* ---------- Drawer ---------- */
@@ -1840,15 +2446,106 @@
     return opts.join("");
   }
 
+  function cvGenerationOptionsHtml(selectedId = "") {
+    const opts = [`<option value=""${selectedId ? "" : " selected"}>Auto-pick best CV</option>`];
+    for (const cv of cvs) {
+      const sel = String(cv.id) === String(selectedId) ? " selected" : "";
+      opts.push(`<option value="${escapeHtml(cv.id)}"${sel}>${escapeHtml(cv.label)}${cv.is_default ? " (default)" : ""}</option>`);
+    }
+    return opts.join("");
+  }
+
   function statusOptionsHtml(current) {
     return statuses.map((s) => `<option value="${s.key}"${s.key === current ? " selected" : ""}>${escapeHtml(s.label)}</option>`).join("");
   }
 
+  function renderPacketReview(app, { editable = false } = {}) {
+    const hasGenerated = hasPacket(app);
+    const subject = app.email_subject || "";
+    const body = app.email_body || "";
+    const letter = app.motivation_letter || "";
+    const id = escapeHtml(app.id);
+    const actions = `
+      <div class="packet-actions">
+        <button class="btn small" type="button" data-copy-subject="${id}"${subject ? "" : " disabled"}>Copy subject</button>
+        <button class="btn small" type="button" data-copy-body="${id}"${body ? "" : " disabled"}>Copy body</button>
+        <button class="btn small" type="button" data-gmail-draft="${id}"${subject || body ? "" : " disabled"}>Create Gmail draft</button>
+        <button class="btn small" type="button" data-bundle="${id}">Download ZIP</button>
+        ${app.status === "applied" ? "" : `<button class="btn small primary" type="button" data-mark-applied="${id}">Mark applied</button>`}
+      </div>
+    `;
+
+    if (!hasGenerated) {
+      return `
+        <div class="detail-block">
+          <div class="detail-block-head">
+            <div>
+              <h4>Packet review</h4>
+              <p class="panel-note">Generate the letter or email before reviewing the packet.</p>
+            </div>
+          </div>
+          <div class="notice warn">No generated packet yet. Use Generate packet first.</div>
+        </div>
+      `;
+    }
+
+    const editableFields = editable ? `
+      <div class="field">
+        <label for="edLetter">Cover letter</label>
+        <textarea id="edLetter" style="min-height:220px;">${escapeHtml(letter)}</textarea>
+      </div>
+      <div style="height:12px;"></div>
+      <div class="field">
+        <label for="edSubject">Email subject</label>
+        <input id="edSubject" value="${escapeHtml(subject)}">
+      </div>
+      <div style="height:12px;"></div>
+      <div class="field">
+        <label for="edBody">Email body</label>
+        <textarea id="edBody" style="min-height:160px;">${escapeHtml(body)}</textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="button" data-save-edits="${id}">Save edits</button>
+      </div>
+    ` : `
+      <div class="packet-grid">
+        <div class="packet-preview">
+          <h5>Email subject</h5>
+          <pre>${escapeHtml(subject || "No subject generated.")}</pre>
+        </div>
+        <div class="packet-preview">
+          <h5>Selected CV</h5>
+          <pre>${escapeHtml(cvLabelById(app.selected_cv_id))}</pre>
+        </div>
+        <div class="packet-preview wide">
+          <h5>Email body</h5>
+          <pre>${escapeHtml(body || "No email body generated.")}</pre>
+        </div>
+        <div class="packet-preview wide">
+          <h5>Cover letter</h5>
+          <pre>${escapeHtml(letter || "No cover letter generated.")}</pre>
+        </div>
+      </div>
+    `;
+
+    return `
+      <div class="detail-block">
+        <div class="detail-block-head">
+          <div>
+            <h4>Packet review</h4>
+            <p class="panel-note">Copy the email, create a Gmail draft, build the ZIP, or mark the application as sent.</p>
+          </div>
+          ${actions}
+        </div>
+        ${editableFields}
+      </div>
+    `;
+  }
+
   function renderDrawer(app) {
-    const safeJobUrl = safeExternalUrl(app.url);
     const extracted = app.extracted || {};
     const reqs = Array.isArray(extracted.requirements) ? extracted.requirements : [];
-    const defaultCv = app.selected_cv_id || cvs.find((c) => c.is_default)?.id || "";
+    const mgmt = managementForApp(app);
 
     const extractedBlock = (extracted.company || extracted.position || extracted.location || extracted.salary || extracted.deadline || reqs.length) ? `
       <div class="detail-block">
@@ -1869,32 +2566,10 @@
         <p style="font-size:14px;white-space:pre-wrap;">${escapeHtml(app.cv_recommendation)}</p>
       </div>` : "";
 
-    const generated = (app.motivation_letter || app.email_subject || app.email_body) ? `
-      <div class="detail-block">
-        <h4>Generated documents (editable)</h4>
-        <div class="field">
-          <label for="edLetter">Cover letter</label>
-          <textarea id="edLetter" style="min-height:220px;">${escapeHtml(app.motivation_letter || "")}</textarea>
-        </div>
-        <div style="height:12px;"></div>
-        <div class="field">
-          <label for="edSubject">Email subject</label>
-          <input id="edSubject" value="${escapeHtml(app.email_subject || "")}">
-        </div>
-        <div style="height:12px;"></div>
-        <div class="field">
-          <label for="edBody">Email body</label>
-          <textarea id="edBody" style="min-height:160px;">${escapeHtml(app.email_body || "")}</textarea>
-        </div>
-        <div class="form-actions">
-          <button class="btn" type="button" data-save-edits="${escapeHtml(app.id)}">Save edits</button>
-        </div>
-      </div>` : "";
-
     refs.drawerContent.innerHTML = `
       <div class="close-row">
         <div>
-          <div class="eyebrow">${escapeHtml(statusLabel(app.status))}</div>
+          <div class="eyebrow">Management view</div>
           <h2 style="font-size:20px;font-weight:730;letter-spacing:-0.02em;margin-top:2px;">${escapeHtml(app.company || "Untitled application")}</h2>
           <p class="panel-note">${escapeHtml(app.position || "Role not set")}</p>
         </div>
@@ -1908,25 +2583,40 @@
         <span class="tag">${escapeHtml((app.language || "de").toUpperCase())}</span>
         <span class="tag">${escapeHtml(formatDate(appDate(app)))}</span>
         <span class="tag">${escapeHtml(cvLabelById(app.selected_cv_id))}</span>
-      </div>
-
-      <div class="detail-grid">
-        ${detailCard("Source", app.source || "Not set")}
-        ${detailCard("Location", app.location || "Not set")}
-        ${detailCard("Salary", app.salary || "Not set")}
-        ${detailCard("Deadline", app.deadline || "Not set")}
-        ${detailCard("Job URL", safeJobUrl ? `<a href="${escapeHtml(safeJobUrl)}" target="_blank" rel="noopener">Open posting</a>` : "Not set", true)}
+        ${defaultNextAction(app) ? `<span class="tag">${escapeHtml(defaultNextAction(app))}</span>` : ""}
       </div>
 
       <div class="detail-block">
-        <h4>Quick edit</h4>
+        <div class="detail-block-head">
+          <div>
+            <h4>Manage application</h4>
+            <p class="panel-note">Track what happens next, then keep the source details tidy.</p>
+          </div>
+        </div>
         <div class="form-grid">
           <div class="field"><label for="dwStatus">Status</label><select id="dwStatus">${statusOptionsHtml(app.status)}</select></div>
+          <div class="field"><label for="dwNextAction">Next action</label><input id="dwNextAction" value="${escapeHtml(mgmt.next_action)}" placeholder="${escapeHtml(defaultNextAction(app) || "Follow up, send packet, prep interview")}"></div>
+          <div class="field"><label for="dwFollowUp">Follow-up date</label><input id="dwFollowUp" type="date" value="${escapeHtml(dateInputValue(mgmt.follow_up))}"></div>
+          <div class="field"><label for="dwRecipientName">Recipient name</label><input id="dwRecipientName" value="${escapeHtml(mgmt.contact)}" placeholder="Recruiter or hiring team"></div>
+          <div class="field"><label for="dwRecipientEmail">Recipient email</label><input id="dwRecipientEmail" type="email" value="${escapeHtml(mgmt.recipient_email || "")}" placeholder="recruiting@example.com"></div>
+          <div class="field"><label for="dwChannel">Channel</label><select id="dwChannel">
+            <option value="email"${mgmt.channel === "email" ? " selected" : ""}>Email</option>
+            <option value="portal"${mgmt.channel === "portal" ? " selected" : ""}>Company portal</option>
+            <option value="linkedin"${mgmt.channel === "linkedin" ? " selected" : ""}>LinkedIn</option>
+            <option value="other"${mgmt.channel === "other" ? " selected" : ""}>Other</option>
+          </select></div>
           <div class="field"><label for="dwCv">CV variant</label><select id="dwCv">${cvOptionsHtml(app.selected_cv_id)}</select></div>
+          <div class="field"><label for="dwCompany">Company</label><input id="dwCompany" value="${escapeHtml(app.company || "")}"></div>
+          <div class="field"><label for="dwPosition">Position</label><input id="dwPosition" value="${escapeHtml(app.position || "")}"></div>
+          <div class="field"><label for="dwSource">Source</label><input id="dwSource" value="${escapeHtml(app.source || "")}"></div>
+          <div class="field"><label for="dwLocation">Location</label><input id="dwLocation" value="${escapeHtml(app.location || "")}"></div>
+          <div class="field"><label for="dwSalary">Salary</label><input id="dwSalary" value="${escapeHtml(app.salary || "")}"></div>
+          <div class="field"><label for="dwDeadline">Deadline</label><input id="dwDeadline" type="date" value="${escapeHtml(dateInputValue(app.deadline))}"></div>
+          <div class="field full"><label for="dwUrl">Job URL</label><input id="dwUrl" type="url" value="${escapeHtml(app.url || "")}" placeholder="https://..."></div>
         </div>
         <div class="field full" style="margin-top:14px;">
           <label for="dwNotes">Notes</label>
-          <textarea id="dwNotes" style="min-height:90px;">${escapeHtml(app.notes || "")}</textarea>
+          <textarea id="dwNotes" style="min-height:90px;">${escapeHtml(mgmt.notes || "")}</textarea>
         </div>
         <div class="form-actions">
           <button class="btn" type="button" data-save-meta="${escapeHtml(app.id)}">Save changes</button>
@@ -1936,7 +2626,7 @@
       ${extractedBlock}
 
       <div class="detail-block">
-        <h4>Generate documents</h4>
+        <h4>Generate packet</h4>
         <div class="ck-row"><input type="checkbox" id="genLetter" checked><label for="genLetter">Cover letter</label></div>
         <div class="ck-row"><input type="checkbox" id="genEmail" checked><label for="genEmail">Application email</label></div>
         <div class="field" style="margin-top:10px;max-width:220px;">
@@ -1948,8 +2638,8 @@
         </div>
         <div class="field" style="margin-top:14px;">
           <label for="genCv">CV to base the letter on</label>
-          <select id="genCv">${cvOptionsHtml(defaultCv)}</select>
-          <span class="helper">The AI also recommends a CV; its suggestion appears below after generating.</span>
+          <select id="genCv">${cvGenerationOptionsHtml("")}</select>
+          <span class="helper">Default is Auto-pick best CV. Choose a variant only when you want to override the AI.</span>
         </div>
         <div class="field" style="margin-top:14px;">
           <label for="genExtra">Extra instructions (optional)</label>
@@ -1957,11 +2647,11 @@
         </div>
         ${recoBlock}
         <div class="form-actions">
-          <button class="btn primary" type="button" data-generate="${escapeHtml(app.id)}" id="generateBtn">Generate</button>
+          <button class="btn primary" type="button" data-generate="${escapeHtml(app.id)}" id="generateBtn">Generate packet</button>
         </div>
       </div>
 
-      ${generated}
+      ${renderPacketReview(app, { editable: true })}
 
       <div class="detail-block">
         <h4>Documents</h4>
@@ -2003,13 +2693,42 @@
 
   /* ---------- Drawer actions ---------- */
   async function saveMeta(id) {
+    const app = getApp(id);
     const status = document.getElementById("dwStatus")?.value;
     const selected = document.getElementById("dwCv")?.value;
-    const notes = document.getElementById("dwNotes")?.value || "";
+    const management = {
+      next_action: document.getElementById("dwNextAction")?.value || "",
+      follow_up: document.getElementById("dwFollowUp")?.value || "",
+      contact: document.getElementById("dwRecipientName")?.value || "",
+      channel: document.getElementById("dwChannel")?.value || "",
+      recipient_email: document.getElementById("dwRecipientEmail")?.value || "",
+      notes: document.getElementById("dwNotes")?.value || "",
+    };
+    const nativeManagement = hasNativeManagement(app);
+    const notes = nativeManagement ? management.notes : buildManagementNotes(management);
+    const payload = {
+      status,
+      selected_cv_id: selected || null,
+      company: document.getElementById("dwCompany")?.value || "",
+      position: document.getElementById("dwPosition")?.value || "",
+      source: document.getElementById("dwSource")?.value || "",
+      location: document.getElementById("dwLocation")?.value || "",
+      salary: document.getElementById("dwSalary")?.value || "",
+      deadline: document.getElementById("dwDeadline")?.value || null,
+      url: document.getElementById("dwUrl")?.value || "",
+      notes,
+    };
+    if (nativeManagement) {
+      payload.next_action = management.next_action;
+      payload.follow_up_date = management.follow_up || null;
+      payload.recipient_name = management.contact;
+      payload.recipient_email = management.recipient_email;
+      payload.application_channel = management.channel || "email";
+    }
     try {
       const updated = await api(`/api/applications/${id}`, {
         method: "PATCH",
-        json: { status, selected_cv_id: selected || null, notes },
+        json: payload,
       });
       applications = applications.map((a) => (String(a.id) === String(id) ? updated : a));
       renderAll();
@@ -2022,13 +2741,14 @@
     const motivation_letter = document.getElementById("edLetter")?.value || "";
     const email_subject = document.getElementById("edSubject")?.value || "";
     const email_body = document.getElementById("edBody")?.value || "";
+    const payload = { motivation_letter, email_subject, email_body };
     try {
-      const updated = await api(`/api/applications/${id}`, {
-        method: "PATCH",
-        json: { motivation_letter, email_subject, email_body },
-      });
+      const updated = await api(`/api/applications/${id}/packet`, { method: "PUT", json: payload });
       applications = applications.map((a) => (String(a.id) === String(id) ? updated : a));
-      toast("Edits saved.", "success");
+      if (intakeDraftApp && String(intakeDraftApp.id) === String(id)) intakeDraftApp = updated;
+      renderAll();
+      if (String(openApplicationId) === String(id)) renderDrawer(updated);
+      toast("Packet updated.", "success");
     } catch (e) { toast(e.message, "error"); }
   }
 
@@ -2052,7 +2772,7 @@
       toast("Documents generated.", "success");
     } catch (e) {
       toast(e.message, "error");
-      setLoading(btn, false, "Generate");
+      setLoading(btn, false, "Generate packet");
     }
   }
 
@@ -2089,14 +2809,17 @@
     } catch (e) { toast(e.message, "error"); }
   }
 
-  async function makeBundle(id) {
-    const btn = document.getElementById("bundleBtn");
+  async function makeBundle(id, btn = document.getElementById("bundleBtn")) {
     setLoading(btn, true, "Building ZIP...");
     try {
       const doc = await api(`/api/applications/${id}/bundle`, { method: "POST" });
       const updated = await reloadApplication(id);
       renderAll();
-      renderDrawer(updated);
+      if (String(openApplicationId) === String(id)) renderDrawer(updated);
+      if (intakeDraftApp && String(intakeDraftApp.id) === String(id)) {
+        intakeDraftApp = updated;
+        if (refs.intakeModal.classList.contains("open")) renderIntakeWizard();
+      }
       // Trigger the download via the document download URL.
       window.location.href = `/api/documents/${doc.id}/download`;
       toast("ZIP ready.", "success");
@@ -2129,6 +2852,113 @@
   /* ---------- View documents / CVs in a new tab ---------- */
   function viewUrl(url) { window.open(url, "_blank", "noopener"); }
 
+  async function copyToClipboard(value, label) {
+    const text = String(value || "");
+    if (!text.trim()) {
+      toast(`No ${label} to copy.`, "error");
+      return;
+    }
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.left = "-9999px";
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+      toast(`${label} copied.`, "success");
+    } catch (e) {
+      toast(`Could not copy ${label}.`, "error");
+    }
+  }
+
+  function copyPacketPart(id, part) {
+    const app = getApp(id);
+    if (!app) return;
+    const packet = packetText(app);
+    if (part === "subject") copyToClipboard(packet.subject, "Subject");
+    if (part === "body") copyToClipboard(packet.body, "Email body");
+  }
+
+  async function createGmailDraft(id) {
+    const app = getApp(id);
+    if (!app) return;
+    const packet = packetText(app);
+    if (!packet.subject.trim() && !packet.body.trim()) {
+      toast("Generate an email before creating a Gmail draft.", "error");
+      return;
+    }
+    const mgmt = managementForApp(app);
+    try {
+      const result = await api(`/api/applications/${id}/gmail-draft`, {
+        method: "POST",
+        json: { to: mgmt.recipient_email || "", subject: packet.subject, body: packet.body },
+      });
+      const updated = result?.application;
+      if (updated) {
+        applications = applications.map((item) => (String(item.id) === String(id) ? updated : item));
+        if (intakeDraftApp && String(intakeDraftApp.id) === String(id)) intakeDraftApp = updated;
+        renderAll();
+        if (String(openApplicationId) === String(id)) renderDrawer(updated);
+        if (refs.intakeModal.classList.contains("open")) renderIntakeWizard();
+      }
+      toast("Gmail draft created.", "success");
+    } catch (e) {
+      if (e.status === 409 && /connect gmail/i.test(e.message)) {
+        window.location.href = "/api/gmail/connect";
+        return;
+      }
+      toast(e.message, "error");
+    }
+  }
+
+  async function markApplied(id) {
+    const app = getApp(id);
+    if (!app) return;
+    const mgmt = managementForApp(app);
+    const nativeManagement = hasNativeManagement(app);
+    const management = {
+      next_action: mgmt.next_action || "Follow up",
+      follow_up: mgmt.follow_up || addDaysIso(7),
+      contact: mgmt.contact,
+      recipient_email: mgmt.recipient_email,
+      channel: mgmt.channel || "email",
+      notes: mgmt.notes,
+    };
+    const payload = { status: "applied" };
+    if (nativeManagement) {
+      payload.next_action = management.next_action;
+      payload.follow_up_date = management.follow_up || null;
+      payload.recipient_name = management.contact;
+      payload.recipient_email = management.recipient_email;
+      payload.application_channel = management.channel;
+      payload.notes = management.notes;
+      payload.last_activity_at = addDaysIso(0);
+    } else {
+      payload.notes = buildManagementNotes(management);
+    }
+    try {
+      const updated = await api(`/api/applications/${id}`, {
+        method: "PATCH",
+        json: payload,
+      });
+      applications = applications.map((item) => (String(item.id) === String(id) ? updated : item));
+      if (intakeDraftApp && String(intakeDraftApp.id) === String(id)) intakeDraftApp = updated;
+      renderAll();
+      if (String(openApplicationId) === String(id)) renderDrawer(updated);
+      if (refs.intakeModal.classList.contains("open")) renderIntakeWizard();
+      toast("Marked as applied.", "success");
+    } catch (e) {
+      toast(e.message, "error");
+    }
+  }
+
   /* ===================== EVENTS ===================== */
   refs.themeToggle.addEventListener("click", toggleTheme);
   refs.loginForm.addEventListener("submit", handleLogin);
@@ -2159,6 +2989,7 @@
     const action = target.dataset.action;
     if (action === "new-application") openIntake();
     if (action === "close-intake") closeIntake();
+    if (action === "intake-back") intakeBack();
     if (action === "close-drawer") closeDrawer();
     if (action === "clear-filters") clearFilters();
     if (target.dataset.open) openApplication(target.dataset.open);
@@ -2167,7 +2998,11 @@
     if (target.dataset.saveEdits) await saveEdits(target.dataset.saveEdits);
     if (target.dataset.generate) await generate(target.dataset.generate);
     if (target.dataset.uploadProof) await uploadProof(target.dataset.uploadProof);
-    if (target.dataset.bundle) await makeBundle(target.dataset.bundle);
+    if (target.dataset.bundle) await makeBundle(target.dataset.bundle, target);
+    if (target.dataset.copySubject) copyPacketPart(target.dataset.copySubject, "subject");
+    if (target.dataset.copyBody) copyPacketPart(target.dataset.copyBody, "body");
+    if (target.dataset.gmailDraft) await createGmailDraft(target.dataset.gmailDraft);
+    if (target.dataset.markApplied) await markApplied(target.dataset.markApplied);
     if (target.dataset.docView) viewUrl(`/api/documents/${target.dataset.docView}/download`);
     if (target.dataset.docDelete) await deleteDoc(target.dataset.docDelete);
     if (target.dataset.cvView) viewUrl(`/api/cvs/${target.dataset.cvView}/download`);

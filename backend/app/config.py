@@ -45,6 +45,14 @@ class Settings(BaseSettings):
     claude_timeout: int = 180  # seconds per generation
     anthropic_api_key: str = ""  # only for the anthropic_api backend
 
+    # Gmail OAuth / drafts. Scope stays compose-only: create/update drafts, no send.
+    gmail_oauth_client_id: str = ""
+    gmail_oauth_client_secret: str = ""
+    gmail_oauth_redirect_uri: str = ""  # e.g. https://jobs.fezle.io/api/gmail/callback
+    gmail_oauth_scopes: str = "https://www.googleapis.com/auth/gmail.compose"
+    gmail_token_encryption_key: str = ""  # stable secret; falls back to SECRET_KEY in dev
+    gmail_oauth_success_url: str = "/?gmail=connected"
+
     # Frontend static dir (served by FastAPI). Resolved relative to repo root.
     frontend_dir: str = "../frontend"
 

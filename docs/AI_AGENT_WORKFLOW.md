@@ -1,79 +1,50 @@
 # AI Agent Workflow
 
-This guide explains how to use the app with Codex, Claude, or another assistant without leaking private data.
+This app now generates application packets directly. External assistants should
+usually work on the codebase, not on private application content.
 
-## Recommended Flow
+## Product Flow
 
-1. Fill out the candidate profile in the app.
-2. Upload CV variants in the app.
-3. Add the target application.
-4. Open the application detail view.
-5. Copy the AI brief.
-6. Paste the brief and the job posting into the assistant.
-7. Ask for the specific output you need.
+1. User completes sender profile.
+2. User uploads one or more CV variants.
+3. User clicks `Apply to job`.
+4. The wizard stores the posting and confirms application basics.
+5. Backend generation uses uploaded CV text as the only source of experience.
+6. User reviews the packet, creates a Gmail draft, downloads a ZIP, and tracks
+   the next action.
 
-Useful requests:
+## Repository Rules For Assistants
 
-- "Recommend the best CV variant and explain why."
-- "Draft a concise application email."
-- "Draft a one-page cover letter."
-- "Prepare interview questions and answer outlines."
-- "Summarize this posting into tracker notes."
-- "Identify gaps I should be honest about."
+- Keep the frontend build-free vanilla JS unless explicitly changed.
+- Keep AI calls behind `services/ai_client.py::AIClient`.
+- Keep generated PDFs faithful to the Bewerbungen rules.
+- Preserve per-user scoping on every endpoint.
+- Do not add third-party analytics or telemetry.
+- Keep `AGENTS.md` and `CLAUDE.md` equivalent.
+- Run tests and a privacy audit before commit, push, or deploy.
 
-## Safe Assistant Instructions
+## Private Data
 
-Tell the assistant:
-
-- Use only the profile and job posting provided.
-- Do not invent experience, employers, credentials, salary history, or language levels.
-- Mark missing information as a question.
-- Keep private data out of public commits, issues, pull requests, and screenshots.
-- Keep application emails concise.
-- Use a confident but honest tone.
-
-## What Not To Share Publicly
-
-Do not publish:
+Never commit or paste into public tools:
 
 - CV files.
-- Backup JSON files.
-- Confirmation screenshots.
-- Interview invitations.
-- Rejection or offer letters.
-- Private contact details.
-- Salary negotiation notes.
+- Generated letters or emails.
+- Job postings.
+- Gmail OAuth tokens.
+- R2 keys.
+- `.env` files.
+- Database dumps.
+- Screenshots or proof files.
 - Real application histories.
 
-## Working With This Repository
+## AI Generation Safety
 
-When an assistant edits the repository:
+When changing prompts or generation behavior:
 
-- Keep the app static and dependency-free.
-- Keep data storage local to the browser.
-- Keep `AGENTS.md` and `CLAUDE.md` equivalent unless tool-specific instructions are requested.
-- Run a privacy audit before committing.
-- Do not add real user data to sample files.
-
-## Prompt Template
-
-```text
-I am applying for this role. Use the candidate profile and application context below.
-
-Tasks:
-1. Recommend the best CV variant.
-2. Draft a concise application email.
-3. Draft tracker notes.
-4. List interview prep points.
-
-Rules:
-- Do not invent experience.
-- Ask about missing information.
-- Keep the tone specific and professional.
-
-Candidate and application brief:
-[paste app brief here]
-
-Job posting:
-[paste job posting here]
-```
+- CV text remains the only source for experience, employers, education,
+  credentials, and skills.
+- Profile data supplies contact details, languages, availability, and
+  preferences only.
+- Do not invent missing experience.
+- Do not mention AMS or that the applicant was told to apply.
+- Keep application emails shorter than letters.

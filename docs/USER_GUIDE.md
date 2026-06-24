@@ -2,91 +2,66 @@
 
 ## Open The App
 
-Open `index.html` in a modern browser. The app works from a local file, from a cloned repository, or from GitHub Pages.
+Open `https://jobs.fezle.io` and sign in. The app is server-backed: profiles,
+applications, and document metadata live in Postgres; CVs, postings, generated
+PDFs, ZIPs, and proof files live in Cloudflare R2.
 
-## Set Up Your Profile
+## First-Time Setup
 
-Open the `Profile` tab and add:
+On first login, complete the required sender details:
 
-- Name and headline.
-- Location and availability.
-- Contact details.
-- Languages.
-- Skills.
-- Short professional summary.
-- Application preferences such as tone, salary range, remote policy, and topics to avoid.
+- Name.
+- Address.
+- Phone.
+- Email.
 
-This information is used only inside your browser and in AI briefs you choose to copy.
+Then upload at least one CV variant in the `CVs` tab. The generated letter and
+email are grounded in the uploaded CV text, so a readable CV is required before
+document generation.
 
-## Add CVs
+## Apply To A Job
 
-Open the `CVs` tab and upload one or more PDF files. Give each one a practical variant name, for example:
+Use `Apply to job` for the main workflow:
 
-- General.
-- Technical.
-- Leadership.
-- Internship.
-- Design.
+1. Drop the posting by pasting text, pasting a URL, or uploading a PDF/image.
+2. Confirm company, role, language, source, location, salary, deadline, channel,
+   and recipient details.
+3. Generate the packet. Keep `Auto-pick best CV` unless you want to force a CV.
+4. Review the packet, copy the email, create a Gmail draft, download the ZIP, or
+   mark the application as applied.
 
-Set the most common one as default. When you create an application, the app can preselect or show that CV variant.
+If you edit the generated letter or email, use `Save edits`. The app regenerates
+the stored PDF/TXT packet files so ZIP downloads and Gmail drafts use the latest
+text.
 
-## Track Applications
+## Gmail Drafts
 
-Open `Tracker` or `Applications` and add a record for each opportunity.
+Gmail integration creates or updates drafts only. It does not send emails.
 
-Useful fields:
+Connect Gmail when prompted, then use `Create Gmail draft` from the packet review.
+The draft is created in your Gmail account with the generated email and current
+packet attachments. Review and send it from Gmail.
 
-- Company.
-- Role.
+## Manage Applications
+
+Open an application to manage:
+
 - Status.
-- Date applied.
-- Source.
-- Location.
-- Salary.
-- Job URL.
+- Next action.
+- Follow-up date.
+- Recipient name and email.
+- Application channel.
 - Selected CV.
-- Notes.
+- Company, role, source, URL, deadline, salary, and notes.
 
-Use notes for requirements, contacts, follow-up reminders, and interview details.
+The dashboard `Needs attention` queue is action-based. It highlights missing
+packets, ready-to-send applications, follow-ups, interviews, and offers.
 
-## Upload Proof Files
+## Documents And Proofs
 
-When adding or editing an application, upload proof files such as:
+Each application stores its posting, generated letter, generated email, ZIP, and
+proof files. Upload proof files such as confirmation screenshots, interview
+invitations, rejection messages, and offers.
 
-- Application confirmation screenshots.
-- Saved confirmation emails.
-- Interview invitations.
-- Rejection messages.
-- Offer letters.
-
-Files are stored in the browser, not in repository folders.
-
-## Back Up Your Data
-
-Open `Backup` and choose `Export backup`.
-
-The backup JSON can contain your profile, application history, CV PDFs, and proof files. Store it somewhere private. Do not commit it to GitHub.
-
-To restore data, use `Import backup`. Importing replaces the current browser data.
-
-## Moving Between Browsers Or Devices
-
-Browser storage is local to each browser profile and each site URL. To move data:
-
-1. Export a backup from the old browser or URL.
-2. Open the app in the new browser or URL.
-3. Import the backup.
-
-## Using AI Assistants
-
-The `Backup` tab includes a general AI brief. Each application detail view includes an application-specific brief.
-
-Copy the brief and paste it into an assistant with the job post when you want help with:
-
-- Cover letters.
-- Application emails.
-- Interview preparation.
-- Follow-up messages.
-- CV variant selection.
-
-Review everything before sending. The assistant should not invent missing experience.
+Do not commit real CVs, postings, letters, screenshots, exports, `.env` files,
+OAuth tokens, database dumps, or R2 keys to the repository.

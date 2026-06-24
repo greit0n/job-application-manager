@@ -36,9 +36,9 @@ def create_app() -> FastAPI:
     def health() -> JSONResponse:
         return JSONResponse({"status": "ok", "env": settings.env})
 
-    from .routers import applications, auth, cvs, documents, generation, profiles
+    from .routers import applications, auth, cvs, documents, generation, gmail, profiles
 
-    for module in (auth, profiles, cvs, applications, generation, documents):
+    for module in (auth, profiles, cvs, applications, generation, documents, gmail):
         app.include_router(module.router, prefix="/api")
 
     # Static SPA last so /api/* wins. html=True serves index.html for "/".

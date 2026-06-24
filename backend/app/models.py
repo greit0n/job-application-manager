@@ -45,10 +45,13 @@ class User(Base):
     profile: Mapped["Profile"] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
     cv_variants: Mapped[list["CVVariant"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     applications: Mapped[list["Application"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    gmail_connection: Mapped["GmailConnection | None"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
 
 
 class Profile(Base):
-    """One per user. Drives every generated letter/email — real data only."""
+    """One per user. Drives every generated letter/email; real data only."""
 
     __tablename__ = "profiles"
 
@@ -102,6 +105,12 @@ class Application(Base):
     location: Mapped[str] = mapped_column(String(255), default="")
     url: Mapped[str] = mapped_column(String(1024), default="")
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
+    application_channel: Mapped[str] = mapped_column(String(40), default="email")
+    recipient_name: Mapped[str] = mapped_column(String(255), default="")
+    recipient_email: Mapped[str] = mapped_column(String(255), default="")
+    next_action: Mapped[str] = mapped_column(String(255), default="")
+    follow_up_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    last_activity_at: Mapped[date | None] = mapped_column(Date, nullable=True)
     notes: Mapped[str] = mapped_column(Text, default="")
 
     selected_cv_id: Mapped[int | None] = mapped_column(
@@ -117,6 +126,8 @@ class Application(Base):
     email_subject: Mapped[str] = mapped_column(String(255), default="")
     email_body: Mapped[str] = mapped_column(Text, default="")
     cv_recommendation: Mapped[str] = mapped_column(Text, default="")
+    gmail_draft_id: Mapped[str] = mapped_column(String(255), default="")
+    gmail_drafted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -160,3 +171,24 @@ class Generation(Base):
     status: Mapped[str] = mapped_column(String(20), default="ok")  # ok | error
     error: Mapped[str] = mapped_column(Text, default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class GmailConnection(Base):
+    """Encrypted Gmail OAuth tokens for one logged-in app user."""
+
+    __tablename__ = "gmail_connections"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True)
+
+    gmail_email: Mapped[str] = mapped_column(String(255), default="")
+    access_token_encrypted: Mapped[str] = mapped_column(Text, default="")
+    refresh_token_encrypted: Mapped[str] = mapped_column(Text, default="")
+    token_type: Mapped[str] = mapped_column(String(40), default="Bearer")
+    scope: Mapped[str] = mapped_column(Text, default="")
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    user: Mapped["User"] = relationship(back_populates="gmail_connection")

@@ -274,13 +274,13 @@ class CodexCliClient(AIClient):
     ) -> str:
         cmd = [
             self.bin,
+            "--ask-for-approval",
+            "never",
             "exec",
             "--ephemeral",
             "--skip-git-repo-check",
             "--sandbox",
             "read-only",
-            "--ask-for-approval",
-            "never",
             "--ignore-user-config",
             "--ignore-rules",
         ]

@@ -53,15 +53,13 @@ def test_codex_cli_complete_uses_safe_exec_and_stdin(monkeypatch, tmp_path):
     assert result == "plain result"
     call = calls[0]
     cmd = call["cmd"]
-    assert cmd[0:2] == ["codex-test", "exec"]
+    assert cmd[0:4] == ["codex-test", "--ask-for-approval", "never", "exec"]
     assert "-" in cmd
     for expected in (
         "--ephemeral",
         "--skip-git-repo-check",
         "--sandbox",
         "read-only",
-        "--ask-for-approval",
-        "never",
         "--ignore-user-config",
         "--ignore-rules",
         "--model",

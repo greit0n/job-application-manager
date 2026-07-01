@@ -101,7 +101,7 @@ async def intake_application(
     content_type = (file.content_type if file is not None else "") or ""
 
     try:
-        # intake does blocking I/O (httpx / pdfplumber / Claude subprocess); run it
+        # intake does blocking I/O (httpx / pdfplumber / CLI subprocess); run it
         # off the event loop so other users' requests are not frozen.
         job_text = await run_in_threadpool(
             intake_svc.intake,
@@ -112,7 +112,7 @@ async def intake_application(
             filename=filename,
             content_type=content_type,
             ai=ai,
-            timeout=get_settings().claude_timeout,
+            timeout=get_settings().ai_timeout,
         )
     except intake_svc.IntakeError as exc:
         # An uploaded posting is still worth keeping even if text extraction fails;
@@ -193,7 +193,7 @@ def generate_documents(
                 db=db,
                 storage=storage,
                 ai=ai,
-                timeout=get_settings().claude_timeout,
+                timeout=get_settings().ai_timeout,
             )
 
     # Generation grounds entirely on CV text now - refuse if there is none.
@@ -215,7 +215,7 @@ def generate_documents(
             produce_letter=payload.produce_letter,
             produce_email=payload.produce_email,
             extra=payload.extra_instructions,
-            timeout=get_settings().claude_timeout,
+            timeout=get_settings().ai_timeout,
         )
     except gen_svc.GenerationError as exc:
         db.add(
@@ -224,6 +224,7 @@ def generate_documents(
                 user_id=user.id,
                 kind="full",
                 language=language,
+                model=get_settings().ai_model_label,
                 status="error",
                 error=str(exc)[:2000],
             )
@@ -275,7 +276,7 @@ def generate_documents(
                 user_id=user.id,
                 kind="full",
                 language=language,
-                model=get_settings().claude_model or "",
+                model=get_settings().ai_model_label,
                 status="error",
                 error=message[:2000],
             )
@@ -358,7 +359,7 @@ def generate_documents(
             user_id=user.id,
             kind="full",
             language=language,
-            model=get_settings().claude_model or "",
+            model=get_settings().ai_model_label,
             status="ok",
         )
     )

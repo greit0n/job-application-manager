@@ -27,7 +27,7 @@ frontend/index.html (vanilla-JS SPA, no build)  ──fetch JSON──▶  FastA
                                                                   ├── session-cookie auth (argon2), per-user scoping
                                                                   ├── Postgres (host cluster :5433, DB `jobsapp`)
                                                                   ├── R2 bucket `jobsapp-documents` (S3 API, boto3)
-                                                                  ├── AIClient → ClaudeCodeClient (`claude -p`)
+                                                                  ├── AIClient → CodexCliClient (`codex exec`)
                                                                   └── ReportLab PDFs → ZIP bundles
 cloudflared tunnel: jobs.fezle.io → 127.0.0.1:8095   (edge SSL at Cloudflare)
 ```
@@ -35,10 +35,10 @@ cloudflared tunnel: jobs.fezle.io → 127.0.0.1:8095   (edge SSL at Cloudflare)
 - **Backend:** Python / FastAPI. `backend/app/` = `main.py`, `config.py` (pydantic-settings),
   `db.py` (SQLAlchemy 2), `models.py`, `schemas.py`, `auth.py`, `routers/`, `services/`.
 - **AI is always behind `services/ai_client.py::AIClient`.** Default backend is
-  `ClaudeCodeClient` (shells out to the Claude Code CLI using georg's Max subscription via
-  `CLAUDE_CODE_OAUTH_TOKEN`). `AnthropicApiClient` (pay-per-token) is a config swap
-  (`AI_BACKEND=anthropic_api`). **Never call an AI SDK/API directly from a router** — go
-  through the interface.
+  `CodexCliClient` (shells out to `codex exec` using the `jobsapp` user's persisted
+  ChatGPT/Codex subscription login under `CODEX_HOME`). `ClaudeCodeClient` remains an
+  inactive rollback backend (`AI_BACKEND=claude_code`). **Never call an AI SDK/API
+  directly from a router** — go through the interface.
 - **Frontend** stays dependency-free vanilla JS, served as static files by FastAPI. It
   evolved from the old `index.html` (the `state`/`statuses`/`render()`/drawer/modal patterns
   remain) — but storage is now the API, not localStorage/IndexedDB.
@@ -86,7 +86,7 @@ The Motivationsschreiben quality comes from the rules in
 ## Data & privacy rules
 
 - The repo is private. **Never commit** real CVs, letters, postings, backups, screenshots,
-  profile data, `.env`, R2 keys, the Claude token, or DB dumps. `.gitignore` enforces this;
+  profile data, `.env`, R2 keys, CLI auth tokens, or DB dumps. `.gitignore` enforces this;
   verify with `git status` and a personal-data grep before any push.
 - Profiles, applications, and document *metadata* live in Postgres; the *files*
   (CVs, postings, generated PDFs, ZIPs) live in R2. Every query is **scoped to the logged-in
@@ -110,7 +110,7 @@ nginx/compose.** Before any server change: read `/root/SERVER_REGISTRY.md` and
 `/opt/ops-registry/AGENTS.md`, run read-only inventory, and append a dated entry to the
 host CHANGELOG. Full steps: `deploy/DEPLOY.md`, `deploy/cloudflared-ingress.md`.
 
-AI auth note: the deployed app drives Claude via the CLI on georg's subscription. This is a
-gray area vs Anthropic's terms (subscription auth isn't meant to power apps) and limits are
-tuned for interactive use; if it becomes a problem, flip `AI_BACKEND=anthropic_api` and set
-`ANTHROPIC_API_KEY` — no code changes.
+AI auth note: the deployed app drives Codex via `codex exec` on georg's ChatGPT/Codex
+subscription, using the `jobsapp` user's persisted Codex CLI login. Do not add OpenAI
+Platform API keys or Anthropic API keys for this app path. Claude Code is retained only as
+an inactive rollback backend if it is ever re-authenticated separately.

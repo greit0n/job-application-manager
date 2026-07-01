@@ -1,7 +1,7 @@
 """End-to-end AI flow with a fake AI backend: intake -> generate -> bundle.
 
 Exercises the generation router together with the pdf / generation / intake / bundle
-services and the storage layer, without touching the network or a real Claude.
+services and the storage layer, without touching the network or a real AI backend.
 """
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ class FakeAI:
     def complete(self, prompt, *, system=None, files=None, timeout=None):
         return "transcribed text"
 
-    def complete_json(self, prompt, *, system=None, files=None, timeout=None):
+    def complete_json(self, prompt, *, system=None, files=None, timeout=None, schema=None):
         return dict(self.PAYLOAD)
 
 

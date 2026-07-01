@@ -28,6 +28,47 @@ class GenerationError(RuntimeError):
     """Raised when generation fails (AI error or unusable response)."""
 
 
+GENERATION_OUTPUT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "extracted": {
+            "type": "object",
+            "properties": {
+                "company": {"type": "string"},
+                "position": {"type": "string"},
+                "location": {"type": "string"},
+                "salary": {"type": "string"},
+                "deadline": {"type": "string"},
+                "requirements": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": [
+                "company",
+                "position",
+                "location",
+                "salary",
+                "deadline",
+                "requirements",
+            ],
+            "additionalProperties": False,
+        },
+        "recommended_cv_label": {"type": "string"},
+        "recommended_cv_reason": {"type": "string"},
+        "motivation_letter": {"type": "string"},
+        "email_subject": {"type": "string"},
+        "email_body": {"type": "string"},
+    },
+    "required": [
+        "extracted",
+        "recommended_cv_label",
+        "recommended_cv_reason",
+        "motivation_letter",
+        "email_subject",
+        "email_body",
+    ],
+    "additionalProperties": False,
+}
+
+
 # --------------------------------------------------------------------------- #
 # Dash sanitizing
 # --------------------------------------------------------------------------- #
@@ -394,7 +435,12 @@ def generate(
     _, cv_labels = _format_cvs(cvs)
 
     try:
-        raw = ai.complete_json(user, system=system, timeout=timeout)
+        raw = ai.complete_json(
+            user,
+            system=system,
+            timeout=timeout,
+            schema=GENERATION_OUTPUT_SCHEMA,
+        )
     except AIError as exc:
         raise GenerationError(f"AI generation failed: {exc}") from exc
     except (json.JSONDecodeError, ValueError) as exc:  # pragma: no cover - defensive

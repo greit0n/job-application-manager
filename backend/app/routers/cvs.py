@@ -85,7 +85,7 @@ async def upload_cv(
             db=db,
             storage=get_storage(),
             ai=get_ai_client(),
-            timeout=get_settings().claude_timeout,
+            timeout=get_settings().ai_timeout,
         )
     except Exception:
         logger.warning("CV text extraction on upload failed for cv_id=%s", cv.id, exc_info=True)

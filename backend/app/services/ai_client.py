@@ -1,10 +1,8 @@
 """AI client abstraction.
 
-The deployed app drives generation through the Claude Code CLI using georg's
-Max subscription (`ClaudeCodeClient`). The whole thing sits behind the
-`AIClient` interface so we can swap to a pay-per-token Anthropic API key
-(`AnthropicApiClient`) by flipping `AI_BACKEND` in config -- no call-site
-changes -- if subscription limits or terms ever become a problem.
+The deployed app drives generation through the Codex CLI using georg's
+ChatGPT/Codex subscription (`CodexCliClient`). Claude Code remains behind the
+same interface as an inactive rollback backend.
 """
 from __future__ import annotations
 
@@ -12,8 +10,10 @@ import json
 import os
 import re
 import subprocess
+import tempfile
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
 
 from ..config import Settings, get_settings
 
@@ -47,6 +47,7 @@ class AIClient(ABC):
         system: str | None = None,
         files: list[str] | None = None,
         timeout: int | None = None,
+        schema: dict[str, Any] | None = None,
     ) -> dict:
         """Like `complete`, but parse the first JSON object out of the output."""
         raw = self.complete(prompt, system=system, files=files, timeout=timeout)
@@ -94,7 +95,7 @@ class ClaudeCodeClient(AIClient):
         self.token = settings.claude_code_oauth_token
         self.model = settings.claude_model
         self.effort = settings.claude_effort
-        self.default_timeout = settings.claude_timeout
+        self.default_timeout = settings.ai_timeout
 
     def complete(
         self,
@@ -153,6 +154,175 @@ class ClaudeCodeClient(AIClient):
         return _parse_cli_result(proc.stdout)
 
 
+_IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+
+
+class CodexCliClient(AIClient):
+    """Shells out to `codex exec` using persisted Codex CLI auth.
+
+    The production service user must be logged in with ChatGPT/Codex subscription
+    auth under CODEX_HOME. No OpenAI API key or Anthropic key is used here.
+    """
+
+    def __init__(self, settings: Settings):
+        self.bin = settings.codex_bin
+        self.model = settings.codex_model
+        self.codex_home = settings.codex_home
+        self.default_timeout = settings.ai_timeout
+
+    def complete(
+        self,
+        prompt: str,
+        *,
+        system: str | None = None,
+        files: list[str] | None = None,
+        timeout: int | None = None,
+    ) -> str:
+        return self._complete(
+            prompt,
+            system=system,
+            files=files,
+            timeout=timeout,
+            schema_path=None,
+        )
+
+    def complete_json(
+        self,
+        prompt: str,
+        *,
+        system: str | None = None,
+        files: list[str] | None = None,
+        timeout: int | None = None,
+        schema: dict[str, Any] | None = None,
+    ) -> dict:
+        if schema is None:
+            return super().complete_json(
+                prompt, system=system, files=files, timeout=timeout, schema=schema
+            )
+
+        schema_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                "w", suffix=".schema.json", delete=False, encoding="utf-8"
+            ) as fh:
+                json.dump(schema, fh, ensure_ascii=False)
+                schema_path = Path(fh.name)
+            raw = self._complete(
+                prompt,
+                system=system,
+                files=files,
+                timeout=timeout,
+                schema_path=schema_path,
+            )
+        finally:
+            if schema_path is not None:
+                try:
+                    schema_path.unlink()
+                except OSError:
+                    pass
+
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise AIError(f"Invalid JSON from Codex CLI: {exc}") from exc
+        if not isinstance(payload, dict):
+            raise AIError("Invalid JSON from Codex CLI: expected an object")
+        return payload
+
+    def _complete(
+        self,
+        prompt: str,
+        *,
+        system: str | None,
+        files: list[str] | None,
+        timeout: int | None,
+        schema_path: Path | None,
+    ) -> str:
+        full_prompt = f"{system.strip()}\n\n---\n\n{prompt}" if system else prompt
+
+        resolved_files = [Path(f).resolve() for f in files or []]
+        images = [str(p) for p in resolved_files if p.suffix.lower() in _IMAGE_SUFFIXES]
+        if resolved_files:
+            names = ", ".join(p.name for p in resolved_files)
+            full_prompt += f"\n\nFiles you can read in the current directory: {names}"
+            cwd = str(resolved_files[0].parent)
+            return self._run_codex(
+                full_prompt,
+                cwd=cwd,
+                images=images,
+                schema_path=schema_path,
+                timeout=timeout,
+            )
+
+        with tempfile.TemporaryDirectory(prefix="jobsapp-codex-") as tmp_dir:
+            return self._run_codex(
+                full_prompt,
+                cwd=tmp_dir,
+                images=images,
+                schema_path=schema_path,
+                timeout=timeout,
+            )
+
+    def _run_codex(
+        self,
+        prompt: str,
+        *,
+        cwd: str,
+        images: list[str],
+        schema_path: Path | None,
+        timeout: int | None,
+    ) -> str:
+        cmd = [
+            self.bin,
+            "exec",
+            "--ephemeral",
+            "--skip-git-repo-check",
+            "--sandbox",
+            "read-only",
+            "--ask-for-approval",
+            "never",
+            "--ignore-user-config",
+            "--ignore-rules",
+        ]
+        if self.model:
+            cmd += ["--model", self.model]
+        if schema_path is not None:
+            cmd += ["--output-schema", str(schema_path)]
+        for image in images:
+            cmd += ["--image", image]
+        cmd.append("-")
+
+        env = dict(os.environ)
+        if self.codex_home:
+            env["CODEX_HOME"] = self.codex_home
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                input=prompt,
+                capture_output=True,
+                text=True,
+                timeout=timeout or self.default_timeout,
+                cwd=cwd,
+                env=env,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise AIError("Codex CLI timed out") from exc
+        except FileNotFoundError as exc:
+            raise AIError(
+                f"Codex CLI binary not found at {self.bin!r}. Install it and set CODEX_BIN."
+            ) from exc
+
+        if proc.returncode != 0:
+            detail = (proc.stderr or proc.stdout or "").strip()[:500]
+            raise AIError(f"Codex CLI exited {proc.returncode}: {detail}")
+
+        stdout = proc.stdout.strip()
+        if not stdout:
+            raise AIError("Empty output from Codex CLI")
+        return stdout
+
+
 def _parse_cli_result(stdout: str) -> str:
     """`claude -p --output-format json` prints an object with a `result` field."""
     stdout = stdout.strip()
@@ -170,71 +340,12 @@ def _parse_cli_result(stdout: str) -> str:
     return stdout
 
 
-def _system_path() -> str:
-    import os
-
-    return os.environ.get("PATH", "")
-
-
-class AnthropicApiClient(AIClient):
-    """Pay-per-token fallback via the Anthropic Messages API (httpx, no SDK dep).
-
-    Text-only for now; document/image input would add base64 document blocks.
-    """
-
-    API_URL = "https://api.anthropic.com/v1/messages"
-
-    def __init__(self, settings: Settings):
-        self.api_key = settings.anthropic_api_key
-        self.model = settings.claude_model or "claude-opus-4-8"
-        self.default_timeout = settings.claude_timeout
-
-    def complete(
-        self,
-        prompt: str,
-        *,
-        system: str | None = None,
-        files: list[str] | None = None,
-        timeout: int | None = None,
-    ) -> str:
-        if not self.api_key:
-            raise AIError("ANTHROPIC_API_KEY is not set for the anthropic_api backend")
-        import httpx
-
-        body: dict = {
-            "model": self.model,
-            "max_tokens": 8000,
-            "messages": [{"role": "user", "content": prompt}],
-        }
-        if system:
-            body["system"] = system
-
-        headers = {
-            "x-api-key": self.api_key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-        }
-        try:
-            resp = httpx.post(
-                self.API_URL,
-                json=body,
-                headers=headers,
-                timeout=timeout or self.default_timeout,
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise AIError(f"Anthropic API request failed: {exc}") from exc
-
-        data = resp.json()
-        parts = [b.get("text", "") for b in data.get("content", []) if b.get("type") == "text"]
-        text = "".join(parts).strip()
-        if not text:
-            raise AIError("Empty response from Anthropic API")
-        return text
-
-
 def get_ai_client(settings: Settings | None = None) -> AIClient:
     settings = settings or get_settings()
-    if settings.ai_backend == "anthropic_api":
-        return AnthropicApiClient(settings)
-    return ClaudeCodeClient(settings)
+    if settings.ai_backend == "codex_cli":
+        return CodexCliClient(settings)
+    if settings.ai_backend == "claude_code":
+        return ClaudeCodeClient(settings)
+    raise AIError(
+        f"Unsupported AI_BACKEND={settings.ai_backend!r}. Use 'codex_cli' or 'claude_code'."
+    )

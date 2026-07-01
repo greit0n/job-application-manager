@@ -32,8 +32,10 @@ class FakeAI:
             raise self._raise
         return "fake text"
 
-    def complete_json(self, prompt, *, system=None, files=None, timeout=None):
-        self.calls.append({"prompt": prompt, "system": system, "files": files})
+    def complete_json(self, prompt, *, system=None, files=None, timeout=None, schema=None):
+        self.calls.append(
+            {"prompt": prompt, "system": system, "files": files, "schema": schema}
+        )
         if self._raise is not None:
             raise self._raise
         return dict(self._json_result)
@@ -255,6 +257,10 @@ def test_generate_fills_all_keys_and_validates_cv_label():
 
     labels = {c.label for c in cvs}
     assert result["recommended_cv_label"] == "" or result["recommended_cv_label"] in labels
+    schema = ai.calls[-1]["schema"]
+    assert schema["type"] == "object"
+    assert set(schema["required"]) == set(_required_types())
+    assert schema["additionalProperties"] is False
 
 
 def test_generate_raises_generation_error_when_ai_fails():
@@ -336,7 +342,7 @@ class _FakeAI:
     def complete(self, prompt, *, system=None, files=None, timeout=None):
         return "AI TRANSCRIBED CV"
 
-    def complete_json(self, prompt, *, system=None, files=None, timeout=None):
+    def complete_json(self, prompt, *, system=None, files=None, timeout=None, schema=None):
         return {}
 
 

@@ -1,7 +1,7 @@
 # Job Application Manager
 
 Private, AI-assisted job-application manager for two users, deployed at
-**jobs.fezle.io**. Drop a job posting (paste / PDF / URL), let Claude draft a
+**jobs.fezle.io**. Drop a job posting (paste / PDF / URL), let AI draft a
 tailored **Motivationsschreiben** and application email and pick the best CV
 variant, track the application through its pipeline, and download a ready-to-send
 ZIP (CV + letter). German and English.
@@ -16,8 +16,9 @@ ZIP (CV + letter). German and English.
 - **Frontend:** dependency-free vanilla-JS SPA (`frontend/`), served statically by FastAPI.
 - **Database:** PostgreSQL.
 - **File storage:** Cloudflare R2 (S3-compatible).
-- **AI:** Claude, via the Claude Code CLI on the server (subscription auth), behind a
-  swappable `AIClient` interface (`AI_BACKEND=anthropic_api` switches to a pay-per-token key).
+- **AI:** Codex CLI on the server, using georg's ChatGPT/Codex subscription login,
+  behind a swappable `AIClient` interface. Claude Code remains available only as
+  an inactive rollback backend.
 - **Hosting:** Hetzner, isolated and tunneled through Cloudflare (`jobs.fezle.io`).
 
 ## Local development

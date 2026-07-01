@@ -62,6 +62,7 @@ def test_codex_cli_complete_uses_safe_exec_and_stdin(monkeypatch, tmp_path):
         "read-only",
         "--ignore-user-config",
         "--ignore-rules",
+        "--output-last-message",
         "--model",
         "gpt-5-test",
     ):
@@ -69,6 +70,43 @@ def test_codex_cli_complete_uses_safe_exec_and_stdin(monkeypatch, tmp_path):
     assert call["input"] == "system rules\n\n---\n\nhello"
     assert call["timeout"] == 11
     assert call["env"]["CODEX_HOME"] == str(tmp_path / "codex-home")
+
+
+def test_codex_cli_complete_reads_output_last_message(monkeypatch):
+    calls: list[Path] = []
+
+    def fake_run(cmd, **kwargs):
+        output_path = Path(cmd[cmd.index("--output-last-message") + 1])
+        output_path.write_text("final result\n", encoding="utf-8")
+        calls.append(output_path)
+        return subprocess.CompletedProcess(cmd, 0, stdout="session transcript\n", stderr="")
+
+    monkeypatch.setattr(ai_client.subprocess, "run", fake_run)
+    client = ai_client.CodexCliClient(make_settings())
+
+    result = client.complete("hello")
+
+    assert result == "final result"
+    assert calls
+    assert not calls[0].exists()
+
+
+def test_codex_cli_resolves_bin_from_path(monkeypatch):
+    calls: list[dict] = []
+
+    def fake_which(name):
+        return "C:\\Tools\\codex.CMD" if name == "codex" else None
+
+    def fake_run(cmd, **kwargs):
+        calls.append({"cmd": cmd, **kwargs})
+        return subprocess.CompletedProcess(cmd, 0, stdout="result\n", stderr="")
+
+    monkeypatch.setattr(ai_client.shutil, "which", fake_which)
+    monkeypatch.setattr(ai_client.subprocess, "run", fake_run)
+    client = ai_client.CodexCliClient(make_settings(codex_bin="codex"))
+
+    assert client.complete("hello") == "result"
+    assert calls[0]["cmd"][0] == "C:\\Tools\\codex.CMD"
 
 
 def test_codex_cli_complete_json_uses_schema_and_parses_output(monkeypatch):

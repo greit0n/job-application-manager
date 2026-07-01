@@ -44,7 +44,7 @@ Note the endpoint (`https://<acct>.r2.cloudflarestorage.com`), key id, and secre
 sudo -iu jobsapp bash -lc 'curl -fsSL https://chatgpt.com/codex/install.sh | sh'
 sudo -iu jobsapp bash -lc 'export PATH="$HOME/.local/bin:$PATH"; codex login --device-auth'
 sudo -iu jobsapp bash -lc 'export PATH="$HOME/.local/bin:$PATH"; codex doctor --summary'
-sudo -iu jobsapp bash -lc 'export PATH="$HOME/.local/bin:$PATH"; codex --ask-for-approval never exec --ephemeral --skip-git-repo-check --sandbox read-only "say hi"'
+printf 'Reply with exactly OK' | sudo -iu jobsapp bash -lc 'export PATH="$HOME/.local/bin:$PATH"; codex --ask-for-approval never exec --ephemeral --skip-git-repo-check --sandbox read-only --ignore-user-config --ignore-rules -'
 ```
 This uses the `jobsapp` user's persisted Codex CLI ChatGPT/Codex subscription login in
 `/home/jobsapp/.codex`. Do not configure an OpenAI Platform API key or Anthropic API key

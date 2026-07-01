@@ -49,8 +49,13 @@ cloudflared tunnel: jobs.fezle.io → 127.0.0.1:8095   (edge SSL at Cloudflare)
 # Local dev (from repo root)
 docker compose -f deploy/docker-compose.dev.yml up -d        # Postgres on :5433
 cp backend/.env.example backend/.env                          # then fill in
+codex login status                                             # if needed: codex login --device-auth
+codex doctor --summary
+"Reply with exactly OK" | codex --ask-for-approval never exec --ephemeral --skip-git-repo-check --sandbox read-only --ignore-user-config --ignore-rules -
 python -m venv backend/.venv && backend/.venv/Scripts/pip install -r backend/requirements.txt   # Windows
 #   (Linux/macOS: backend/.venv/bin/pip ...)
+cd backend && .venv/Scripts/python -c "from app.config import get_settings; print(get_settings().ai_backend)"
+cd backend && .venv/Scripts/python -c "from app.services.ai_client import get_ai_client; print(get_ai_client().complete('Reply with exactly OK'))"
 cd backend && .venv/Scripts/uvicorn app.main:app --reload     # http://localhost:8000
 cd backend && .venv/Scripts/pytest                            # tests
 
@@ -59,6 +64,9 @@ cd backend && .venv/Scripts/alembic upgrade head
 cd backend && .venv/Scripts/alembic revision --autogenerate -m "msg"
 ```
 
+Local `backend/.env.example` defaults to `AI_BACKEND=codex_cli` and empty
+`CODEX_HOME`, so local generation uses the logged-in local Codex CLI account.
+Claude Code rollback settings stay commented unless intentionally re-enabled.
 There is no frontend build step. Deployment runbook: `deploy/DEPLOY.md`.
 
 ## Document generation — match the Bewerbungen output

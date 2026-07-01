@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 from abc import ABC, abstractmethod
@@ -272,31 +273,40 @@ class CodexCliClient(AIClient):
         schema_path: Path | None,
         timeout: int | None,
     ) -> str:
-        cmd = [
-            self.bin,
-            "--ask-for-approval",
-            "never",
-            "exec",
-            "--ephemeral",
-            "--skip-git-repo-check",
-            "--sandbox",
-            "read-only",
-            "--ignore-user-config",
-            "--ignore-rules",
-        ]
-        if self.model:
-            cmd += ["--model", self.model]
-        if schema_path is not None:
-            cmd += ["--output-schema", str(schema_path)]
-        for image in images:
-            cmd += ["--image", image]
-        cmd.append("-")
-
-        env = dict(os.environ)
-        if self.codex_home:
-            env["CODEX_HOME"] = self.codex_home
-
+        output_path: Path | None = None
         try:
+            with tempfile.NamedTemporaryFile(
+                "w", suffix=".last-message.txt", delete=False, encoding="utf-8"
+            ) as fh:
+                output_path = Path(fh.name)
+
+            codex_bin = shutil.which(self.bin) or self.bin
+            cmd = [
+                codex_bin,
+                "--ask-for-approval",
+                "never",
+                "exec",
+                "--ephemeral",
+                "--skip-git-repo-check",
+                "--sandbox",
+                "read-only",
+                "--ignore-user-config",
+                "--ignore-rules",
+                "--output-last-message",
+                str(output_path),
+            ]
+            if self.model:
+                cmd += ["--model", self.model]
+            if schema_path is not None:
+                cmd += ["--output-schema", str(schema_path)]
+            for image in images:
+                cmd += ["--image", image]
+            cmd.append("-")
+
+            env = dict(os.environ)
+            if self.codex_home:
+                env["CODEX_HOME"] = self.codex_home
+
             proc = subprocess.run(
                 cmd,
                 input=prompt,
@@ -306,21 +316,38 @@ class CodexCliClient(AIClient):
                 cwd=cwd,
                 env=env,
             )
+
+            if proc.returncode != 0:
+                detail = (proc.stderr or proc.stdout or "").strip()[:500]
+                raise AIError(f"Codex CLI exited {proc.returncode}: {detail}")
+
+            stdout = ""
+            if output_path is not None:
+                try:
+                    stdout = output_path.read_text(encoding="utf-8").strip()
+                except OSError:
+                    stdout = ""
+            if not stdout:
+                stdout = proc.stdout.strip()
+            if not stdout:
+                raise AIError("Empty output from Codex CLI")
+            return stdout
         except subprocess.TimeoutExpired as exc:
             raise AIError("Codex CLI timed out") from exc
         except FileNotFoundError as exc:
             raise AIError(
                 f"Codex CLI binary not found at {self.bin!r}. Install it and set CODEX_BIN."
             ) from exc
-
-        if proc.returncode != 0:
-            detail = (proc.stderr or proc.stdout or "").strip()[:500]
-            raise AIError(f"Codex CLI exited {proc.returncode}: {detail}")
-
-        stdout = proc.stdout.strip()
-        if not stdout:
-            raise AIError("Empty output from Codex CLI")
-        return stdout
+        except PermissionError as exc:
+            raise AIError(
+                f"Codex CLI binary is not executable at {self.bin!r}. Set CODEX_BIN to the real executable path."
+            ) from exc
+        finally:
+            if output_path is not None:
+                try:
+                    output_path.unlink()
+                except OSError:
+                    pass
 
 
 def _parse_cli_result(stdout: str) -> str:

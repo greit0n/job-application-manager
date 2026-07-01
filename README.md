@@ -30,15 +30,28 @@ docker compose -f deploy/docker-compose.dev.yml up -d
 # 2. Backend env
 cp backend/.env.example backend/.env        # then edit
 
-# 3. Python deps
+# 3. Codex CLI subscription auth (one-time per machine/user)
+codex --version
+codex login status                              # if not logged in: codex login --device-auth
+codex doctor --summary
+"Reply with exactly OK" | codex --ask-for-approval never exec --ephemeral --skip-git-repo-check --sandbox read-only --ignore-user-config --ignore-rules -
+
+# 4. Python deps
 python -m venv backend/.venv
 backend/.venv/Scripts/pip install -r backend/requirements.txt   # Windows
 # Linux/macOS: backend/.venv/bin/pip install -r backend/requirements.txt
 
-# 4. Run
+# 5. Verify the app sees Codex and can call it, then run
+cd backend && .venv/Scripts/python -c "from app.config import get_settings; print(get_settings().ai_backend)"
+cd backend && .venv/Scripts/python -c "from app.services.ai_client import get_ai_client; print(get_ai_client().complete('Reply with exactly OK'))"
 cd backend && .venv/Scripts/uvicorn app.main:app --reload        # http://localhost:8000
 cd backend && .venv/Scripts/pytest                               # tests
 ```
+
+`backend/.env.example` defaults to `AI_BACKEND=codex_cli`, `CODEX_BIN=codex`,
+and empty `CODEX_HOME`, so local development uses the logged-in local Codex CLI
+account under your normal `~/.codex`. Claude Code is kept only as commented
+rollback config.
 
 The app serves the frontend at `/` and the JSON API under `/api`.
 
